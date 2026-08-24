@@ -4,34 +4,42 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>404 — Browser Testbed</title>
-<link rel="icon" type="image/svg+xml" href="/browser-testbed/assets/favicon.svg">
-<link rel="stylesheet" href="/browser-testbed/assets/css/testbed.css">
 <script>
-/* A link that carries query parameters with values must land on the site root rather
-   than an error — tracking and campaign parameters are appended to shared links all
-   the time, and any path may come back with them attached.
-
-   Runs before the body renders so no 404 flashes on the way through. A bare unknown
-   path (no parameters) still shows the real 404 below: that is a deliberate test case. */
+/* This document is served for any unknown path, at any depth, and the same file has to
+   work whether the site sits at the origin root or under a project sub-path. So the site
+   root is derived from the requested path, and the assets are linked from it. */
 (function () {
-  var search = location.search;
-  if (!search || search.length < 2) return;
-
-  var hasValue = false;
-  search.slice(1).split('&').forEach(function (pair) {
-    var eq = pair.indexOf('=');
-    if (eq > 0 && pair.slice(eq + 1) !== '') hasValue = true;
-  });
-  if (!hasValue) return;
-
-  /* The site root: the project sub-path on GitHub Pages, the origin root anywhere else. */
   var m = location.pathname.match(/^\/[^/]+\//);
   var root = (m && m[0] !== '/pages/') ? m[0] : '/';
+  window.__testbedRoot = root;
 
-  /* Never bounce onto a URL that would 404 again. */
-  if (location.pathname === root) return;
+  /* A link that carries query parameters with values must land on the site root rather
+     than an error — tracking and campaign parameters are appended to shared links all
+     the time, and any path may come back with them attached. This runs before the body
+     renders, so no 404 flashes on the way through. A bare unknown path still shows the
+     real 404 below: that remains a deliberate test case. */
+  var search = location.search;
+  if (search && search.length > 1 && location.pathname !== root) {
+    var hasValue = false;
+    search.slice(1).split('&').forEach(function (pair) {
+      var eq = pair.indexOf('=');
+      if (eq > 0 && pair.slice(eq + 1) !== '') hasValue = true;
+    });
+    if (hasValue) {
+      location.replace(root + search + location.hash);
+      return;
+    }
+  }
 
-  location.replace(root + search + location.hash);
+  function link(rel, type, href) {
+    var l = document.createElement('link');
+    l.rel = rel;
+    if (type) l.type = type;
+    l.href = root + href;
+    document.head.appendChild(l);
+  }
+  link('icon', 'image/svg+xml', 'assets/favicon.svg');
+  link('stylesheet', null, 'assets/css/testbed.css');
 })();
 </script>
 </head>
@@ -42,12 +50,15 @@
     <p>This is the testbed's custom not-found document, served by GitHub Pages for any
        unknown path. The status code really is 404, so it doubles as an error-handling check.</p>
   </div>
-  <p><a class="tb-btn tb-btn--primary" href="/browser-testbed/" data-testid="notfound-home"
+  <p><a class="tb-btn tb-btn--primary" href="/" data-testid="notfound-home"
         style="text-decoration:none;display:inline-block">Back to the testbed</a></p>
   <p style="color:var(--fg-muted);font-size:13px">Requested path: <code id="path" data-testid="notfound-path"></code></p>
   <p style="color:var(--fg-faint);font-size:12.5px">A request carrying query parameters with values is
      redirected to the site root instead of showing this page.</p>
 </main>
-<script>document.getElementById('path').textContent = location.pathname + location.search;</script>
+<script>
+document.getElementById('path').textContent = location.pathname + location.search;
+document.querySelector('[data-testid="notfound-home"]').href = window.__testbedRoot || '/';
+</script>
 </body>
 </html>
