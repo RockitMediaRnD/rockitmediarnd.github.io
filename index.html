@@ -36,6 +36,16 @@
     </div>
   </div>
 
+  <div class="tb-section" data-testid="home-params-section">
+    <h2>Query parameters <small>what this page received in its URL</small></h2>
+    <div class="tb-section__body">
+      <p class="tb-note">A static host ignores everything after <code>?</code> when it picks a file, so any
+         link with parameters opens this page and the values arrive intact. Unknown paths carrying
+         parameters are redirected here too.</p>
+      <pre class="tb-out" data-testid="home-params"></pre>
+    </div>
+  </div>
+
   <h2 style="font-size:18px;margin:30px 0 12px">Sections</h2>
   <div class="tb-cards" id="section-cards" data-testid="home-cards"></div>
 
@@ -55,6 +65,17 @@ document.addEventListener('DOMContentLoaded', function () {
     a.querySelector('span').textContent = p.desc;
     wrap.appendChild(a);
   });
+
+  var params = new URLSearchParams(location.search);
+  var out = document.querySelector('[data-testid="home-params"]');
+  if (params.toString()) {
+    var lines = [];
+    params.forEach(function (v, k) { lines.push(k + ' = ' + JSON.stringify(v)); });
+    out.textContent = 'location.search: ' + location.search + '\n\n' + lines.join('\n');
+  } else {
+    out.textContent = 'No query parameters. Append something like ?sub2=A1 to the address to see it here.';
+  }
+
   document.documentElement.setAttribute('data-page-script', 'ok');
 });
 </script>

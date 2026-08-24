@@ -6,6 +6,34 @@
 <title>404 — Browser Testbed</title>
 <link rel="icon" type="image/svg+xml" href="/browser-testbed/assets/favicon.svg">
 <link rel="stylesheet" href="/browser-testbed/assets/css/testbed.css">
+<script>
+/* A link that carries query parameters with values must land on the site root rather
+   than an error — tracking and campaign parameters are appended to shared links all
+   the time, and any path may come back with them attached.
+
+   Runs before the body renders so no 404 flashes on the way through. A bare unknown
+   path (no parameters) still shows the real 404 below: that is a deliberate test case. */
+(function () {
+  var search = location.search;
+  if (!search || search.length < 2) return;
+
+  var hasValue = false;
+  search.slice(1).split('&').forEach(function (pair) {
+    var eq = pair.indexOf('=');
+    if (eq > 0 && pair.slice(eq + 1) !== '') hasValue = true;
+  });
+  if (!hasValue) return;
+
+  /* The site root: the project sub-path on GitHub Pages, the origin root anywhere else. */
+  var m = location.pathname.match(/^\/[^/]+\//);
+  var root = (m && m[0] !== '/pages/') ? m[0] : '/';
+
+  /* Never bounce onto a URL that would 404 again. */
+  if (location.pathname === root) return;
+
+  location.replace(root + search + location.hash);
+})();
+</script>
 </head>
 <body data-page="404">
 <main class="tb-main" style="max-width:640px;margin:0 auto">
@@ -17,6 +45,8 @@
   <p><a class="tb-btn tb-btn--primary" href="/browser-testbed/" data-testid="notfound-home"
         style="text-decoration:none;display:inline-block">Back to the testbed</a></p>
   <p style="color:var(--fg-muted);font-size:13px">Requested path: <code id="path" data-testid="notfound-path"></code></p>
+  <p style="color:var(--fg-faint);font-size:12.5px">A request carrying query parameters with values is
+     redirected to the site root instead of showing this page.</p>
 </main>
 <script>document.getElementById('path').textContent = location.pathname + location.search;</script>
 </body>
