@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>404 — Browser Testbed</title>
+<link rel="icon" type="image/svg+xml" href="/browser-testbed/assets/favicon.svg">
+<link rel="stylesheet" href="/browser-testbed/assets/css/testbed.css">
+</head>
+<body data-page="404">
+<main class="tb-main" style="max-width:640px;margin:0 auto">
+  <div class="tb-hero">
+    <h1 class="tb-page-title" data-testid="notfound-title">404 — page not found</h1>
+    <p>This is the testbed's custom not-found document, served by GitHub Pages for any
+       unknown path. The status code really is 404, so it doubles as an error-handling check.</p>
+  </div>
+  <p><a class="tb-btn tb-btn--primary" href="/browser-testbed/" data-testid="notfound-home"
+        style="text-decoration:none;display:inline-block">Back to the testbed</a></p>
+  <p style="color:var(--fg-muted);font-size:13px">Requested path: <code id="path" data-testid="notfound-path"></code></p>
+</main>
+<script>document.getElementById('path').textContent = location.pathname + location.search;</script>
+</body>
+</html>

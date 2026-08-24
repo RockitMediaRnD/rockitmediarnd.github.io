@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Navigation UI — Browser Testbed</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/testbed.css">
+<script src="../assets/js/nav-data.js" defer></script>
+<script src="../assets/js/testbed.js" defer></script>
+<style>
+  .navbar { display:flex; align-items:center; gap:14px; padding:10px 14px; border-radius:var(--radius);
+            background:var(--bg-sunken); border:1px solid var(--border); }
+  .navbar a { color:var(--fg); text-decoration:none; font-size:14px; font-weight:540; padding:5px 8px; border-radius:5px; }
+  .navbar a:hover { background:var(--bg-elev); }
+  .navbar .spacer { flex:1; }
+
+  .mega { position:relative; }
+  .mega__panel { position:absolute; z-index:30; top:calc(100% + 6px); left:0; width:min(560px,86vw);
+                 display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:14px;
+                 background:var(--bg-elev); border:1px solid var(--border); border-radius:var(--radius);
+                 box-shadow:var(--shadow); }
+  .mega__panel[hidden] { display:none; }
+  .mega__panel h4 { margin:0 0 6px; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--fg-faint); }
+  .mega__panel a { display:block; font-size:13.5px; padding:3px 0; }
+
+  .drawer { position:fixed; inset:0 auto 0 0; width:min(320px,84vw); background:var(--bg-elev);
+            border-right:1px solid var(--border); box-shadow:var(--shadow); padding:18px; z-index:70;
+            transform:translateX(-104%); transition:transform .22s ease; }
+  .drawer[data-open="true"] { transform:none; }
+  .scrim { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:65; opacity:0; pointer-events:none; transition:opacity .2s; }
+  .scrim[data-open="true"] { opacity:1; pointer-events:auto; }
+
+  .tabs { display:flex; gap:4px; border-bottom:1px solid var(--border); }
+  .tabs button { border:0; background:none; font:inherit; font-size:14px; padding:8px 14px; cursor:pointer;
+                 color:var(--fg-muted); border-bottom:2px solid transparent; }
+  .tabs button[aria-selected="true"] { color:var(--accent); border-bottom-color:var(--accent); font-weight:600; }
+  .tabpanel { padding:14px 2px; }
+
+  .crumbs { display:flex; flex-wrap:wrap; gap:6px; align-items:center; font-size:13.5px; }
+  .crumbs a { text-decoration:none; }
+  .crumbs span { color:var(--fg-faint); }
+
+  .pager { display:flex; gap:4px; flex-wrap:wrap; }
+  .pager button { min-width:34px; }
+  .pager button[aria-current="page"] { background:var(--accent); border-color:var(--accent); color:var(--accent-fg); }
+
+  .feed { max-height:260px; overflow:auto; border:1px solid var(--border); border-radius:var(--radius-sm); }
+  .feed div { padding:9px 12px; border-bottom:1px solid var(--border); font-size:13.5px; }
+  .vlist { height:260px; overflow:auto; border:1px solid var(--border); border-radius:var(--radius-sm); position:relative; }
+  .vlist__inner { position:relative; }
+  .vlist__row { position:absolute; left:0; right:0; height:32px; padding:6px 12px; font-size:13.5px;
+                border-bottom:1px solid var(--border); }
+  .totop { position:fixed; right:16px; bottom:16px; z-index:35; }
+</style>
+</head>
+<body data-page="navigation-ui">
+<main class="tb-main" id="main">
+
+  <section class="tb-section">
+    <h2>Navbar, drawer and mega menu</h2>
+    <div class="tb-section__body">
+      <nav class="navbar" data-testid="navui-navbar" aria-label="Demo site navigation">
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="navui-drawer-open" aria-expanded="false">☰</button>
+        <b style="font-size:15px">Acme</b>
+        <a href="#" data-testid="navui-link-home">Home</a>
+        <div class="mega" data-testid="navui-mega">
+          <button class="tb-btn tb-btn--sm" type="button" data-testid="navui-mega-toggle" aria-expanded="false" aria-haspopup="true">Products ▾</button>
+          <div class="mega__panel" hidden data-testid="navui-mega-panel">
+            <div><h4>Platform</h4><a href="#">Runtime</a><a href="#">Networking</a><a href="#">Storage</a></div>
+            <div><h4>Tools</h4><a href="#">Inspector</a><a href="#">Profiler</a><a href="#">Recorder</a></div>
+            <div><h4>Support</h4><a href="#">Docs</a><a href="#">Forum</a><a href="#">Status</a></div>
+          </div>
+        </div>
+        <a href="#" data-testid="navui-link-pricing">Pricing</a>
+        <span class="spacer"></span>
+        <a href="#" data-testid="navui-link-signin">Sign in</a>
+      </nav>
+      <p class="tb-hint" style="margin-top:8px">The drawer traps nothing on purpose — it should still be
+         dismissible with <kbd>Esc</kbd> and by clicking the scrim.</p>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Breadcrumbs</h2>
+    <div class="tb-section__body">
+      <nav class="crumbs" aria-label="Breadcrumb" data-testid="navui-breadcrumbs">
+        <a href="../index.html">Testbed</a><span>/</span>
+        <a href="./navigation.html">Navigation</a><span>/</span>
+        <a href="#" aria-current="page">Navigation UI</a>
+      </nav>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Tabs <small>the ARIA tab pattern: arrows move, Home/End jump, Tab leaves</small></h2>
+    <div class="tb-section__body">
+      <div class="tabs" role="tablist" data-testid="navui-tablist">
+        <button role="tab" aria-selected="true" aria-controls="tp-1" id="tab-1" data-testid="navui-tab-1">Overview</button>
+        <button role="tab" aria-selected="false" aria-controls="tp-2" id="tab-2" tabindex="-1" data-testid="navui-tab-2">Details</button>
+        <button role="tab" aria-selected="false" aria-controls="tp-3" id="tab-3" tabindex="-1" data-testid="navui-tab-3">History</button>
+      </div>
+      <div class="tabpanel" role="tabpanel" id="tp-1" aria-labelledby="tab-1" data-testid="navui-panel-1">
+        First panel. Only the selected tab is in the tab order.</div>
+      <div class="tabpanel" role="tabpanel" id="tp-2" aria-labelledby="tab-2" data-testid="navui-panel-2" hidden>
+        Second panel with a <a href="#">link</a> and an <input aria-label="Panel field" style="max-width:200px">.</div>
+      <div class="tabpanel" role="tabpanel" id="tp-3" aria-labelledby="tab-3" data-testid="navui-panel-3" hidden>
+        Third panel.</div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Accordion <small>native &lt;details&gt; and a scripted equivalent</small></h2>
+    <div class="tb-section__body">
+      <details data-testid="navui-details-1" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px">
+        <summary style="cursor:pointer;font-weight:560">Native details / summary</summary>
+        <p style="margin:10px 0 0;color:var(--fg-muted)">Open and close state is handled entirely by the browser.</p>
+      </details>
+      <details data-testid="navui-details-2" open style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px">
+        <summary style="cursor:pointer;font-weight:560">Open by default</summary>
+        <p style="margin:10px 0 0;color:var(--fg-muted)">Contains a <button class="tb-btn tb-btn--sm" type="button" data-testid="navui-details-button">focusable button</button>.</p>
+      </details>
+      <details name="exclusive" data-testid="navui-details-excl-1" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px">
+        <summary style="cursor:pointer;font-weight:560">Exclusive group, item A (name attribute)</summary>
+        <p style="margin:10px 0 0;color:var(--fg-muted)">Where the <code>name</code> attribute is supported, opening B closes A.</p>
+      </details>
+      <details name="exclusive" data-testid="navui-details-excl-2" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px">
+        <summary style="cursor:pointer;font-weight:560">Exclusive group, item B</summary>
+        <p style="margin:10px 0 0;color:var(--fg-muted)">Second item of the group.</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Pagination, infinite scroll and virtualisation</h2>
+    <div class="tb-section__body">
+      <div class="tb-grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
+        <div>
+          <div class="tb-label" style="margin-bottom:8px">Pagination</div>
+          <div class="pager" data-testid="navui-pager"></div>
+          <p class="tb-out" data-testid="navui-page-out" style="margin-top:10px"></p>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:8px">Infinite scroll (IntersectionObserver)</div>
+          <div class="feed" data-testid="navui-feed"></div>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:8px">Virtualised list — 100 000 rows</div>
+          <div class="vlist" data-testid="navui-vlist"><div class="vlist__inner" data-testid="navui-vlist-inner"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Sticky header table &amp; back-to-top</h2>
+    <div class="tb-section__body">
+      <div class="tb-table-wrap" style="max-height:220px;overflow:auto">
+        <table class="tb-table">
+          <thead style="position:sticky;top:0;background:var(--bg-elev)">
+            <tr><th>#</th><th>Name</th><th>Value</th></tr>
+          </thead>
+          <tbody data-testid="navui-sticky-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <button class="tb-btn tb-btn--primary totop" type="button" data-testid="navui-totop" hidden>↑ Top</button>
+
+  <div class="scrim" data-testid="navui-scrim"></div>
+  <aside class="drawer" data-testid="navui-drawer" aria-label="Drawer" aria-hidden="true">
+    <div class="tb-row" style="justify-content:space-between">
+      <b>Menu</b>
+      <button class="tb-btn tb-btn--sm" type="button" data-testid="navui-drawer-close" aria-label="Close drawer">✕</button>
+    </div>
+    <nav style="margin-top:14px;display:grid;gap:8px">
+      <a href="#" data-testid="navui-drawer-link-1">Dashboard</a>
+      <a href="#" data-testid="navui-drawer-link-2">Projects</a>
+      <a href="#" data-testid="navui-drawer-link-3">Team</a>
+      <a href="#" data-testid="navui-drawer-link-4">Settings</a>
+    </nav>
+  </aside>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var q = function (id) { return document.querySelector('[data-testid="' + id + '"]'); };
+
+  /* drawer */
+  var drawer = q('navui-drawer'), scrim = q('navui-scrim'), opener = q('navui-drawer-open');
+  function setDrawer(open) {
+    drawer.setAttribute('data-open', String(open));
+    drawer.setAttribute('aria-hidden', String(!open));
+    scrim.setAttribute('data-open', String(open));
+    opener.setAttribute('aria-expanded', String(open));
+    if (open) q('navui-drawer-close').focus(); else opener.focus();
+  }
+  opener.addEventListener('click', function () { setDrawer(true); });
+  q('navui-drawer-close').addEventListener('click', function () { setDrawer(false); });
+  scrim.addEventListener('click', function () { setDrawer(false); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && drawer.getAttribute('data-open') === 'true') setDrawer(false);
+  });
+
+  /* mega menu */
+  var megaBtn = q('navui-mega-toggle'), megaPanel = q('navui-mega-panel');
+  function setMega(open) { megaPanel.hidden = !open; megaBtn.setAttribute('aria-expanded', String(open)); }
+  megaBtn.addEventListener('click', function () { setMega(megaPanel.hidden); });
+  document.addEventListener('click', function (e) {
+    if (!q('navui-mega').contains(e.target)) setMega(false);
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setMega(false); });
+
+  /* tabs */
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+  function selectTab(i) {
+    tabs.forEach(function (t, j) {
+      var on = i === j;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+    });
+    tabs[i].focus();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { selectTab(i); });
+    t.addEventListener('keydown', function (e) {
+      var n = tabs.length;
+      if (e.key === 'ArrowRight') selectTab((i + 1) % n);
+      else if (e.key === 'ArrowLeft') selectTab((i - 1 + n) % n);
+      else if (e.key === 'Home') selectTab(0);
+      else if (e.key === 'End') selectTab(n - 1);
+      else return;
+      e.preventDefault();
+    });
+  });
+
+  /* pagination */
+  var page = 1, pages = 12, pager = q('navui-pager');
+  function drawPager() {
+    pager.textContent = '';
+    var mk = function (label, target, disabled, current) {
+      var b = document.createElement('button');
+      b.className = 'tb-btn tb-btn--sm';
+      b.type = 'button';
+      b.textContent = label;
+      b.disabled = !!disabled;
+      b.setAttribute('data-testid', 'navui-page-' + String(target));
+      if (current) b.setAttribute('aria-current', 'page');
+      b.addEventListener('click', function () { page = target; drawPager(); });
+      pager.appendChild(b);
+    };
+    mk('‹', Math.max(1, page - 1), page === 1);
+    for (var i = 1; i <= pages; i++) {
+      if (i === 1 || i === pages || Math.abs(i - page) <= 1) mk(String(i), i, false, i === page);
+      else if (Math.abs(i - page) === 2) {
+        var s = document.createElement('span');
+        s.textContent = '…'; s.style.cssText = 'padding:4px;color:var(--fg-faint)';
+        pager.appendChild(s);
+      }
+    }
+    mk('›', Math.min(pages, page + 1), page === pages);
+    q('navui-page-out').textContent = 'Showing page ' + page + ' of ' + pages +
+      ' (rows ' + ((page - 1) * 20 + 1) + '–' + page * 20 + ')';
+  }
+  drawPager();
+
+  /* infinite scroll */
+  var feed = q('navui-feed'), loaded = 0, sentinel = document.createElement('div');
+  sentinel.textContent = 'Loading more…';
+  sentinel.style.color = 'var(--fg-faint)';
+  sentinel.setAttribute('data-testid', 'navui-feed-sentinel');
+  function loadMore() {
+    for (var i = 0; i < 15; i++) {
+      loaded++;
+      var d = document.createElement('div');
+      d.textContent = 'Feed item ' + loaded;
+      d.setAttribute('data-testid', 'navui-feed-item-' + loaded);
+      feed.insertBefore(d, sentinel);
+    }
+    if (loaded >= 120) { sentinel.textContent = 'End of feed (' + loaded + ' items).'; io.disconnect(); }
+  }
+  feed.appendChild(sentinel);
+  var io = new IntersectionObserver(function (entries) {
+    if (entries[0].isIntersecting) loadMore();
+  }, { root: feed, rootMargin: '80px' });
+  io.observe(sentinel);
+  loadMore();
+
+  /* virtualised list */
+  var vlist = q('navui-vlist'), inner = q('navui-vlist-inner');
+  var TOTAL = 100000, ROW = 32;
+  inner.style.height = (TOTAL * ROW) + 'px';
+  function renderRows() {
+    var first = Math.max(0, Math.floor(vlist.scrollTop / ROW) - 4);
+    var count = Math.ceil(vlist.clientHeight / ROW) + 8;
+    inner.textContent = '';
+    for (var i = first; i < Math.min(TOTAL, first + count); i++) {
+      var r = document.createElement('div');
+      r.className = 'vlist__row';
+      r.style.top = (i * ROW) + 'px';
+      r.textContent = 'Row ' + i.toLocaleString();
+      r.setAttribute('data-testid', 'navui-vrow-' + i);
+      inner.appendChild(r);
+    }
+  }
+  vlist.addEventListener('scroll', renderRows, { passive: true });
+  renderRows();
+
+  /* sticky table */
+  var tb = q('navui-sticky-tbody');
+  for (var i = 1; i <= 40; i++) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + i + '</td><td>Row ' + i + '</td><td>' + (i * 137 % 1000) + '</td>';
+    tb.appendChild(tr);
+  }
+
+  /* back to top */
+  var top = q('navui-totop');
+  window.addEventListener('scroll', function () { top.hidden = window.scrollY < 300; }, { passive: true });
+  top.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  document.documentElement.setAttribute('data-page-script', 'ok');
+});
+</script>
+</body>
+</html>

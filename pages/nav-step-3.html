@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Multi-page flow, step 3 — Browser Testbed</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/testbed.css">
+<script src="../assets/js/nav-data.js" defer></script>
+<script src="../assets/js/testbed.js" defer></script>
+</head>
+<body data-page="nav-step-3">
+<main class="tb-main" id="main">
+  <h1 class="tb-page-title" data-testid="step-title">Step 3 of 3</h1>
+  <p class="tb-page-lede">Three real documents, so back/forward, bfcache, scroll restoration and
+     form-state restoration can be checked against actual navigations rather than a router.</p>
+
+  <section class="tb-section">
+    <h2>Move between the steps</h2>
+    <div class="tb-section__body">
+      <div class="tb-row">
+        <a class="tb-btn" href="./nav-step-2.html" data-testid="step-prev">← Step 2</a>
+        <a class="tb-btn tb-btn--primary" href="./navigation-ui.html" data-testid="step-next">Finish → Navigation UI</a>
+        <button class="tb-btn" type="button" data-testid="step-back">history.back()</button>
+        <button class="tb-btn" type="button" data-testid="step-forward">history.forward()</button>
+        <a class="tb-btn" href="./navigation.html" data-testid="step-exit">Back to Navigation</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>State that should survive going back</h2>
+    <div class="tb-section__body">
+      <div class="tb-grid">
+        <div class="tb-field">
+          <label for="carry">Type something, leave, then come back</label>
+          <input id="carry" data-testid="step-input" placeholder="Browsers usually restore this value">
+        </div>
+        <div class="tb-field">
+          <label for="carry-check">Checkbox state</label>
+          <label class="tb-check"><input id="carry-check" type="checkbox" data-testid="step-check"> <span>Checked?</span></label>
+        </div>
+        <div class="tb-field">
+          <label for="carry-scroll">Scroll restoration</label>
+          <select id="carry-scroll" data-testid="step-scroll-restoration">
+            <option value="auto">history.scrollRestoration = auto</option>
+            <option value="manual">history.scrollRestoration = manual</option>
+          </select>
+        </div>
+      </div>
+      <pre class="tb-out" data-testid="step-out" style="margin-top:12px"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Long content, so scroll position matters</h2>
+    <div class="tb-section__body" data-testid="step-filler"></div>
+  </section>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var q = function (id) { return document.querySelector('[data-testid="' + id + '"]'); };
+  var key = 'tb:step-visits';
+  var visits = 0;
+  try { visits = (+sessionStorage.getItem(key) || 0) + 1; sessionStorage.setItem(key, visits); } catch (e) {}
+
+  var filler = q('step-filler');
+  for (var i = 1; i <= 30; i++) {
+    var p = document.createElement('p');
+    p.style.cssText = 'margin:0 0 10px;color:var(--fg-muted)';
+    p.textContent = 'Step 3, filler paragraph ' + i + ' — scroll down, navigate away, then come back.';
+    filler.appendChild(p);
+  }
+
+  q('step-back').addEventListener('click', function () { history.back(); });
+  q('step-forward').addEventListener('click', function () { history.forward(); });
+  q('step-scroll-restoration').addEventListener('change', function () {
+    if ('scrollRestoration' in history) history.scrollRestoration = this.value;
+    report();
+  });
+
+  function report(extra) {
+    q('step-out').textContent = JSON.stringify({
+      step: 3,
+      documentsVisitedThisSession: visits,
+      historyLength: history.length,
+      scrollRestoration: ('scrollRestoration' in history) ? history.scrollRestoration : 'unsupported',
+      scrollY: Math.round(window.scrollY),
+      inputValue: q('step-input').value,
+      navigationType: (performance.getEntriesByType('navigation')[0] || {}).type,
+      note: extra || ''
+    }, null, 2);
+  }
+  window.addEventListener('pageshow', function (e) {
+    report(e.persisted ? 'pageshow: restored from the back/forward cache' : 'pageshow: fresh load');
+  });
+  window.addEventListener('scroll', function () { report(); }, { passive: true });
+  document.addEventListener('input', function () { report(); });
+  report();
+  document.documentElement.setAttribute('data-page-script', 'ok');
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Storage, network &amp; permissions — Browser Testbed</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/testbed.css">
+<script src="../assets/js/nav-data.js" defer></script>
+<script src="../assets/js/testbed.js" defer></script>
+</head>
+<body data-page="storage">
+<main class="tb-main" id="main">
+
+  <section class="tb-section">
+    <h2>Cookies</h2>
+    <div class="tb-section__body">
+      <div class="tb-row" style="margin-bottom:10px">
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-cookie-session">Set session cookie</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-cookie-persistent">Set 7-day cookie</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-cookie-samesite">Set SameSite=Strict</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-cookie-path">Set path-scoped cookie</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-cookie-clear">Delete testbed cookies</button>
+      </div>
+      <pre class="tb-out" data-testid="st-cookie-out"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Web Storage <small>localStorage and sessionStorage, including the storage event</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-row" style="margin-bottom:10px">
+        <input data-testid="st-storage-key" placeholder="key" value="note" style="max-width:130px">
+        <input data-testid="st-storage-value" placeholder="value" value="hello" style="max-width:200px">
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-local-set">localStorage.setItem</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-session-set">sessionStorage.setItem</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-storage-fill">Write 1 MB (quota probe)</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-storage-clear">Clear both</button>
+      </div>
+      <p class="tb-hint">Open this page in a second tab: writes there should fire a <code>storage</code> event here.</p>
+      <pre class="tb-out" data-testid="st-storage-out"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>IndexedDB &amp; Cache Storage</h2>
+    <div class="tb-section__body">
+      <div class="tb-row" style="margin-bottom:10px">
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-idb-add">Add 100 records</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-idb-read">Read all</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-idb-query">Query by index</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-idb-delete">Delete database</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-cache-put">Cache API: put an asset</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-cache-list">Cache API: list</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-quota">navigator.storage.estimate()</button>
+      </div>
+      <pre class="tb-out" data-testid="st-idb-out"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Service worker &amp; offline</h2>
+    <div class="tb-section__body">
+      <div class="tb-row" style="margin-bottom:10px">
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-sw-register">Register</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-sw-message">postMessage to worker</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-sw-unregister">Unregister</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-online">Online status</button>
+      </div>
+      <p class="tb-hint">Register, then go offline in the browser's network tools and reload — the shell should
+         still be served from the cache.</p>
+      <pre class="tb-out" data-testid="st-sw-out"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Workers</h2>
+    <div class="tb-section__body">
+      <div class="tb-row" style="margin-bottom:10px">
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-worker-run">Run a dedicated worker</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-worker-blob">Run a Blob-URL worker</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-worker-block">Block the main thread 1.5 s</button>
+      </div>
+      <pre class="tb-out" data-testid="st-worker-out"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Network <small>fetch, XHR, streaming, CORS, aborts</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-row" style="margin-bottom:10px">
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-fetch-json">fetch JSON</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-fetch-text">fetch text</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-fetch-404">fetch a 404</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-fetch-cors">fetch cross-origin</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-fetch-abort">fetch + AbortController</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-xhr">XMLHttpRequest</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-beacon">sendBeacon</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-websocket">WebSocket (expected to fail)</button>
+      </div>
+      <pre class="tb-out" data-testid="st-net-out"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Permissions &amp; device APIs <small>each button asks for exactly one thing</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-row" style="margin-bottom:10px">
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-perm-query">Query all permissions</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-geo">Geolocation</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-geo-watch">Watch position</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-notify">Notification</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-vibrate">Vibrate</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-wakelock">Wake lock</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-share">Web Share</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-fullscreen">Fullscreen the page</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-orientation">Device orientation</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-battery">Battery status</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="st-idle">Idle detection</button>
+      </div>
+      <pre class="tb-out" data-testid="st-perm-out"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Environment report</h2>
+    <div class="tb-section__body">
+      <pre class="tb-out" data-testid="st-env-out" style="max-height:none"></pre>
+    </div>
+  </section>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var q = function (id) { return document.querySelector('[data-testid="' + id + '"]'); };
+  function show(id, v) { q(id).textContent = typeof v === 'string' ? v : JSON.stringify(v, null, 2); }
+
+  /* ---------------- cookies ---------------- */
+  function cookieReport() {
+    show('st-cookie-out', 'document.cookie:\n' + (document.cookie || '(empty)') +
+      '\n\nnavigator.cookieEnabled: ' + navigator.cookieEnabled);
+  }
+  q('st-cookie-session').addEventListener('click', function () {
+    document.cookie = 'tb_session=' + Date.now() + '; path=/'; cookieReport();
+  });
+  q('st-cookie-persistent').addEventListener('click', function () {
+    var d = new Date(Date.now() + 7 * 864e5).toUTCString();
+    document.cookie = 'tb_persistent=week; expires=' + d + '; path=/'; cookieReport();
+  });
+  q('st-cookie-samesite').addEventListener('click', function () {
+    document.cookie = 'tb_strict=1; path=/; SameSite=Strict'; cookieReport();
+  });
+  q('st-cookie-path').addEventListener('click', function () {
+    document.cookie = 'tb_scoped=pages-only; path=' + location.pathname.replace(/\/[^/]*$/, '/'); cookieReport();
+  });
+  q('st-cookie-clear').addEventListener('click', function () {
+    document.cookie.split(';').forEach(function (c) {
+      var name = c.split('=')[0].trim();
+      if (name.indexOf('tb_') !== 0) return;
+      document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+      document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=' +
+        location.pathname.replace(/\/[^/]*$/, '/');
+    });
+    cookieReport();
+  });
+  cookieReport();
+
+  /* ---------------- web storage ---------------- */
+  function storageReport(extra) {
+    var dump = function (s) {
+      var o = {};
+      try { for (var i = 0; i < s.length; i++) { var k = s.key(i); o[k] = String(s.getItem(k)).slice(0, 60); } }
+      catch (e) { return 'blocked: ' + e.name; }
+      return o;
+    };
+    show('st-storage-out', {
+      note: extra || '',
+      localStorage: dump(localStorage),
+      sessionStorage: dump(sessionStorage)
+    });
+  }
+  q('st-local-set').addEventListener('click', function () {
+    try { localStorage.setItem(q('st-storage-key').value, q('st-storage-value').value); storageReport('written to localStorage'); }
+    catch (e) { storageReport('localStorage threw ' + e.name); }
+  });
+  q('st-session-set').addEventListener('click', function () {
+    try { sessionStorage.setItem(q('st-storage-key').value, q('st-storage-value').value); storageReport('written to sessionStorage'); }
+    catch (e) { storageReport('sessionStorage threw ' + e.name); }
+  });
+  q('st-storage-fill').addEventListener('click', function () {
+    var chunk = 'x'.repeat(1024 * 64), written = 0;
+    try {
+      for (var i = 0; i < 16; i++) { localStorage.setItem('tb_bulk_' + i, chunk); written += chunk.length; }
+      storageReport('wrote ' + (written / 1024) + ' KB without hitting the quota');
+    } catch (e) {
+      storageReport('quota reached after ' + (written / 1024) + ' KB — ' + e.name);
+    }
+  });
+  q('st-storage-clear').addEventListener('click', function () {
+    try { localStorage.clear(); sessionStorage.clear(); } catch (e) { /* blocked */ }
+    storageReport('cleared');
+  });
+  window.addEventListener('storage', function (e) {
+    storageReport('storage event from another tab: key=' + e.key + ' newValue=' + e.newValue);
+  });
+  storageReport();
+
+  /* ---------------- IndexedDB ---------------- */
+  var DB = 'testbed-db';
+  function openDb() {
+    return new Promise(function (res, rej) {
+      var req = indexedDB.open(DB, 1);
+      req.onupgradeneeded = function () {
+        var db = req.result;
+        if (!db.objectStoreNames.contains('items')) {
+          var os = db.createObjectStore('items', { keyPath: 'id', autoIncrement: true });
+          os.createIndex('byCity', 'city');
+        }
+      };
+      req.onsuccess = function () { res(req.result); };
+      req.onerror = function () { rej(req.error); };
+    });
+  }
+  q('st-idb-add').addEventListener('click', function () {
+    openDb().then(function (db) {
+      var tx = db.transaction('items', 'readwrite'), os = tx.objectStore('items');
+      var cities = ['Kyiv', 'Lviv', 'Berlin', 'Tokyo'];
+      for (var i = 0; i < 100; i++) os.add({ name: 'record ' + i, city: cities[i % 4], at: Date.now() });
+      tx.oncomplete = function () { show('st-idb-out', 'Added 100 records to ' + DB + '/items.'); };
+      tx.onerror = function () { show('st-idb-out', 'transaction failed: ' + tx.error); };
+    }).catch(function (e) { show('st-idb-out', 'open failed: ' + e); });
+  });
+  q('st-idb-read').addEventListener('click', function () {
+    openDb().then(function (db) {
+      var req = db.transaction('items').objectStore('items').getAll();
+      req.onsuccess = function () {
+        show('st-idb-out', { count: req.result.length, first3: req.result.slice(0, 3) });
+      };
+    }).catch(function (e) { show('st-idb-out', 'read failed: ' + e); });
+  });
+  q('st-idb-query').addEventListener('click', function () {
+    openDb().then(function (db) {
+      var req = db.transaction('items').objectStore('items').index('byCity').getAll('Kyiv');
+      req.onsuccess = function () {
+        show('st-idb-out', { index: 'byCity = Kyiv', matches: req.result.length, sample: req.result.slice(0, 2) });
+      };
+    }).catch(function (e) { show('st-idb-out', 'query failed: ' + e); });
+  });
+  q('st-idb-delete').addEventListener('click', function () {
+    var req = indexedDB.deleteDatabase(DB);
+    req.onsuccess = function () { show('st-idb-out', 'Database deleted.'); };
+    req.onblocked = function () { show('st-idb-out', 'Delete blocked — another connection is open.'); };
+  });
+  q('st-cache-put').addEventListener('click', function () {
+    if (!window.caches) { show('st-idb-out', 'Cache Storage is not available.'); return; }
+    caches.open('testbed-manual').then(function (c) {
+      return c.add('../assets/media/thumb.png').then(function () {
+        show('st-idb-out', 'Added thumb.png to the "testbed-manual" cache.');
+      });
+    }).catch(function (e) { show('st-idb-out', 'cache put failed: ' + e.message); });
+  });
+  q('st-cache-list').addEventListener('click', function () {
+    if (!window.caches) { show('st-idb-out', 'Cache Storage is not available.'); return; }
+    caches.keys().then(function (names) {
+      return Promise.all(names.map(function (n) {
+        return caches.open(n).then(function (c) { return c.keys(); })
+          .then(function (reqs) { return { cache: n, entries: reqs.map(function (r) { return r.url.split('/').pop(); }) }; });
+      }));
+    }).then(function (r) { show('st-idb-out', r); });
+  });
+  q('st-quota').addEventListener('click', function () {
+    if (!navigator.storage || !navigator.storage.estimate) { show('st-idb-out', 'StorageManager not supported.'); return; }
+    navigator.storage.estimate().then(function (e) {
+      show('st-idb-out', {
+        usageMB: (e.usage / 1048576).toFixed(2),
+        quotaMB: (e.quota / 1048576).toFixed(0),
+        details: e.usageDetails || '(not exposed)',
+        persisted: 'call navigator.storage.persisted() for this'
+      });
+    });
+  });
+
+  /* ---------------- service worker ---------------- */
+  q('st-sw-register').addEventListener('click', function () {
+    if (!navigator.serviceWorker) { show('st-sw-out', 'Service workers are not supported.'); return; }
+    navigator.serviceWorker.register('../sw.js', { scope: '../' }).then(function (reg) {
+      var state = (reg.installing && 'installing') || (reg.waiting && 'waiting') ||
+                  (reg.active && 'active') || 'unknown';
+      show('st-sw-out', 'Registered. scope=' + reg.scope + '\nstate=' + state);
+    }, function (e) { show('st-sw-out', 'Registration failed: ' + e.message); });
+  });
+  q('st-sw-message').addEventListener('click', function () {
+    if (!navigator.serviceWorker || !navigator.serviceWorker.controller) {
+      show('st-sw-out', 'No controlling service worker — register, then reload.');
+      return;
+    }
+    navigator.serviceWorker.controller.postMessage('ping');
+    show('st-sw-out', 'Sent "ping" to the service worker.');
+  });
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker.addEventListener('message', function (e) {
+      show('st-sw-out', 'Message from the service worker: ' + e.data);
+    });
+  }
+  q('st-sw-unregister').addEventListener('click', function () {
+    if (!navigator.serviceWorker) return;
+    navigator.serviceWorker.getRegistrations().then(function (rs) {
+      return Promise.all(rs.map(function (r) { return r.unregister(); }));
+    }).then(function (r) { show('st-sw-out', 'Unregistered ' + r.length + ' registration(s).'); });
+  });
+  q('st-online').addEventListener('click', function () {
+    show('st-sw-out', {
+      onLine: navigator.onLine,
+      connection: navigator.connection ? {
+        effectiveType: navigator.connection.effectiveType,
+        downlink: navigator.connection.downlink,
+        rtt: navigator.connection.rtt,
+        saveData: navigator.connection.saveData
+      } : 'Network Information API not supported'
+    });
+  });
+  window.addEventListener('online', function () { show('st-sw-out', 'online event fired'); });
+  window.addEventListener('offline', function () { show('st-sw-out', 'offline event fired'); });
+
+  /* ---------------- workers ---------------- */
+  q('st-worker-run').addEventListener('click', function () {
+    try {
+      var w = new Worker('../assets/js/worker.js');
+      show('st-worker-out', 'Worker started…');
+      w.onmessage = function (e) {
+        show('st-worker-out', 'Worker finished: ' + JSON.stringify(e.data) +
+          '\n(the main thread stayed responsive)');
+        w.terminate();
+      };
+      w.onerror = function (e) { show('st-worker-out', 'Worker error: ' + e.message); };
+      w.postMessage({ n: 8000000 });
+    } catch (e) { show('st-worker-out', 'Worker constructor failed: ' + e.message); }
+  });
+  q('st-worker-blob').addEventListener('click', function () {
+    var src = 'onmessage=function(e){var s=0;for(var i=0;i<e.data;i++)s+=i%7;postMessage(s);}';
+    var url = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));
+    try {
+      var w = new Worker(url);
+      w.onmessage = function (e) {
+        show('st-worker-out', 'Blob worker result: ' + e.data);
+        w.terminate(); URL.revokeObjectURL(url);
+      };
+      w.postMessage(5000000);
+    } catch (e) { show('st-worker-out', 'Blob worker blocked: ' + e.message); }
+  });
+  q('st-worker-block').addEventListener('click', function () {
+    show('st-worker-out', 'Blocking the main thread for 1.5 s — scrolling and clicks should freeze…');
+    setTimeout(function () {
+      var end = Date.now() + 1500;
+      while (Date.now() < end) { /* deliberate jank */ }
+      show('st-worker-out', 'Main thread unblocked.');
+    }, 60);
+  });
+
+  /* ---------------- network ---------------- */
+  function net(v) { show('st-net-out', v); }
+  q('st-fetch-json').addEventListener('click', function () {
+    fetch('../assets/media/sample.json').then(function (r) {
+      return r.json().then(function (j) {
+        net({ status: r.status, type: r.type, contentType: r.headers.get('content-type'), body: j });
+      });
+    }).catch(function (e) { net('fetch failed: ' + e.message); });
+  });
+  q('st-fetch-text').addEventListener('click', function () {
+    fetch('../assets/media/sample.txt').then(function (r) { return r.text(); })
+      .then(function (t) { net('First 300 chars:\n' + t.slice(0, 300)); })
+      .catch(function (e) { net('fetch failed: ' + e.message); });
+  });
+  q('st-fetch-404').addEventListener('click', function () {
+    fetch('./definitely-missing.json').then(function (r) {
+      net({ ok: r.ok, status: r.status, statusText: r.statusText,
+            note: 'fetch resolves on 404 — only network errors reject' });
+    }).catch(function (e) { net('rejected: ' + e.message); });
+  });
+  q('st-fetch-cors').addEventListener('click', function () {
+    net('Requesting https://example.com/ …');
+    fetch('https://example.com/').then(function (r) {
+      net({ status: r.status, type: r.type, note: 'CORS headers allowed this response to be read.' });
+    }).catch(function (e) {
+      net('Blocked by CORS (expected): ' + e.message);
+    });
+  });
+  q('st-fetch-abort').addEventListener('click', function () {
+    var ctl = new AbortController();
+    net('Starting a request and aborting it in 30 ms…');
+    fetch('../assets/media/wide.png', { signal: ctl.signal })
+      .then(function () { net('Completed before the abort landed.'); })
+      .catch(function (e) { net('Aborted: ' + e.name + ' — ' + e.message); });
+    setTimeout(function () { ctl.abort(); }, 30);
+  });
+  q('st-xhr').addEventListener('click', function () {
+    var x = new XMLHttpRequest();
+    x.open('GET', '../assets/media/sample.csv');
+    x.onprogress = function (e) { net('XHR progress: ' + e.loaded + ' / ' + (e.total || '?')); };
+    x.onload = function () {
+      net('XHR ' + x.status + ' ' + x.statusText + '\nheaders:\n' + x.getAllResponseHeaders() +
+        '\nfirst line: ' + x.responseText.split('\n')[0]);
+    };
+    x.onerror = function () { net('XHR failed.'); };
+    x.send();
+  });
+  q('st-beacon').addEventListener('click', function () {
+    if (!navigator.sendBeacon) { net('sendBeacon is not supported.'); return; }
+    var ok = navigator.sendBeacon('./storage.html', new Blob(['ping'], { type: 'text/plain' }));
+    net('sendBeacon queued: ' + ok + '\n(A static host answers with an error status; the call itself still queues.)');
+  });
+  q('st-websocket').addEventListener('click', function () {
+    var url = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/socket';
+    net('Opening ' + url + ' — a static host has no socket endpoint, so a failure here is the expected result.');
+    try {
+      var ws = new WebSocket(url);
+      ws.onopen = function () { net('WebSocket open (unexpected on a static host).'); ws.close(); };
+      ws.onerror = function () { net('WebSocket error — as expected on a static host.'); };
+      ws.onclose = function (e) { net('WebSocket closed: code=' + e.code + ' clean=' + e.wasClean); };
+    } catch (e) { net('WebSocket constructor threw: ' + e.message); }
+  });
+
+  /* ---------------- permissions & devices ---------------- */
+  function perm(v) { show('st-perm-out', v); }
+  q('st-perm-query').addEventListener('click', function () {
+    if (!navigator.permissions) { perm('Permissions API is not supported.'); return; }
+    var names = ['geolocation', 'notifications', 'camera', 'microphone', 'clipboard-read',
+                 'clipboard-write', 'persistent-storage', 'push', 'midi', 'accelerometer'];
+    Promise.all(names.map(function (n) {
+      return navigator.permissions.query({ name: n }).then(
+        function (s) { return n + ': ' + s.state; },
+        function (e) { return n + ': unsupported (' + e.name + ')'; });
+    })).then(function (r) { perm(r.join('\n')); });
+  });
+  q('st-geo').addEventListener('click', function () {
+    if (!navigator.geolocation) { perm('Geolocation is not supported.'); return; }
+    perm('Requesting position…');
+    navigator.geolocation.getCurrentPosition(function (p) {
+      perm({ lat: +p.coords.latitude.toFixed(4), lon: +p.coords.longitude.toFixed(4),
+             accuracy: p.coords.accuracy, at: new Date(p.timestamp).toISOString() });
+    }, function (e) { perm('Geolocation error ' + e.code + ': ' + e.message); },
+       { enableHighAccuracy: true, timeout: 10000 });
+  });
+  var watchId = null;
+  q('st-geo-watch').addEventListener('click', function () {
+    if (!navigator.geolocation) { perm('Geolocation is not supported.'); return; }
+    if (watchId !== null) {
+      navigator.geolocation.clearWatch(watchId); watchId = null;
+      perm('Stopped watching position.');
+      return;
+    }
+    watchId = navigator.geolocation.watchPosition(function (p) {
+      perm('watch update: ' + p.coords.latitude.toFixed(4) + ', ' + p.coords.longitude.toFixed(4));
+    }, function (e) { perm('watch error: ' + e.message); });
+    perm('Watching position — press again to stop.');
+  });
+  q('st-notify').addEventListener('click', function () {
+    if (!('Notification' in window)) { perm('Notifications are not supported.'); return; }
+    Notification.requestPermission().then(function (state) {
+      perm('Permission: ' + state);
+      if (state === 'granted') {
+        new Notification('Browser Testbed', {
+          body: 'A notification fired at ' + new Date().toLocaleTimeString(),
+          icon: '../assets/media/thumb.png'
+        });
+      }
+    });
+  });
+  q('st-vibrate').addEventListener('click', function () {
+    perm(navigator.vibrate ? 'vibrate([200,100,200]) → ' + navigator.vibrate([200, 100, 200])
+                           : 'Vibration API is not supported.');
+  });
+  var lock = null;
+  q('st-wakelock').addEventListener('click', function () {
+    if (!navigator.wakeLock) { perm('Wake Lock API is not supported.'); return; }
+    if (lock) { lock.release(); lock = null; perm('Wake lock released.'); return; }
+    navigator.wakeLock.request('screen').then(function (l) {
+      lock = l;
+      perm('Screen wake lock held. Press again to release.');
+      l.addEventListener('release', function () { perm('Wake lock was released.'); lock = null; });
+    }, function (e) { perm('Wake lock failed: ' + e.name + ' — ' + e.message); });
+  });
+  q('st-share').addEventListener('click', function () {
+    if (!navigator.share) { perm('Web Share API is not supported.'); return; }
+    navigator.share({ title: 'Browser Testbed', text: 'A UI/UX testbed for browsers', url: location.href })
+      .then(function () { perm('Shared.'); }, function (e) { perm('Share cancelled or failed: ' + e.name); });
+  });
+  q('st-fullscreen').addEventListener('click', function () {
+    if (document.fullscreenElement) { document.exitFullscreen(); return; }
+    (document.documentElement.requestFullscreen
+      ? document.documentElement.requestFullscreen()
+      : Promise.reject(new Error('Fullscreen API not supported'))
+    ).then(function () { perm('Fullscreen entered.'); }, function (e) { perm('Fullscreen failed: ' + e.message); });
+  });
+  q('st-orientation').addEventListener('click', function () {
+    if (typeof DeviceOrientationEvent === 'undefined') { perm('DeviceOrientationEvent is not supported.'); return; }
+    var start = function () {
+      window.addEventListener('deviceorientation', function h(e) {
+        perm({ alpha: e.alpha && +e.alpha.toFixed(1), beta: e.beta && +e.beta.toFixed(1),
+               gamma: e.gamma && +e.gamma.toFixed(1), absolute: e.absolute });
+      });
+      perm('Listening for deviceorientation…');
+    };
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission().then(function (s) {
+        s === 'granted' ? start() : perm('Motion permission: ' + s);
+      }, function (e) { perm('requestPermission failed: ' + e.message); });
+    } else start();
+  });
+  q('st-battery').addEventListener('click', function () {
+    if (!navigator.getBattery) { perm('Battery Status API is not supported.'); return; }
+    navigator.getBattery().then(function (b) {
+      perm({ level: Math.round(b.level * 100) + '%', charging: b.charging,
+             chargingTime: b.chargingTime, dischargingTime: b.dischargingTime });
+    });
+  });
+  q('st-idle').addEventListener('click', function () {
+    if (typeof IdleDetector === 'undefined') { perm('Idle Detection API is not supported.'); return; }
+    IdleDetector.requestPermission().then(function (s) {
+      perm('Idle detection permission: ' + s);
+    }, function (e) { perm('Idle detection failed: ' + e.message); });
+  });
+
+  /* ---------------- environment ---------------- */
+  var nav = navigator;
+  show('st-env-out', {
+    userAgent: nav.userAgent,
+    userAgentData: nav.userAgentData ? {
+      brands: nav.userAgentData.brands, mobile: nav.userAgentData.mobile,
+      platform: nav.userAgentData.platform
+    } : 'not supported',
+    language: nav.language, languages: nav.languages,
+    platform: nav.platform, vendor: nav.vendor,
+    hardwareConcurrency: nav.hardwareConcurrency,
+    deviceMemory: nav.deviceMemory || 'not exposed',
+    maxTouchPoints: nav.maxTouchPoints,
+    cookieEnabled: nav.cookieEnabled,
+    doNotTrack: nav.doNotTrack,
+    pdfViewerEnabled: nav.pdfViewerEnabled,
+    webdriver: nav.webdriver,
+    screen: { width: screen.width, height: screen.height, availWidth: screen.availWidth,
+              colorDepth: screen.colorDepth, orientation: screen.orientation && screen.orientation.type },
+    viewport: { innerWidth: innerWidth, innerHeight: innerHeight, dpr: devicePixelRatio },
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    secureContext: isSecureContext, origin: location.origin,
+    crossOriginIsolated: window.crossOriginIsolated
+  });
+  document.documentElement.setAttribute('data-page-script', 'ok');
+});
+</script>
+</body>
+</html>

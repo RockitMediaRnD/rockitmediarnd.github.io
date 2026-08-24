@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A dependency-free static site exercising the full surface of web UI and UX: inputs, pickers, files, camera, navigation, overlays, storage and rendering. Built for browser development and testing.">
+<title>Browser Testbed — every web UI element in one place</title>
+<link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
+<link rel="stylesheet" href="./assets/css/testbed.css">
+<script src="./assets/js/nav-data.js" defer></script>
+<script src="./assets/js/testbed.js" defer></script>
+</head>
+<body data-page="home">
+<main class="tb-main" id="main">
+
+  <div class="tb-hero">
+    <h1 class="tb-page-title">Browser Testbed</h1>
+    <p>A dependency-free static site that exercises as much of the web platform as a real
+       site would: every input type, native and custom pickers, file and camera capture,
+       every flavour of navigation, overlays, gestures, storage and rendering stress.
+       Built to be pointed at a browser under development.</p>
+  </div>
+
+  <div class="tb-section">
+    <h2>How to use it <small>three built-in test hooks</small></h2>
+    <div class="tb-section__body">
+      <ul style="margin:0;padding-left:20px;color:var(--fg-muted);font-size:14px;line-height:1.75">
+        <li>Every interactive element carries a stable <code>data-testid</code>.</li>
+        <li><b>Event log</b> (<kbd>Alt</kbd>+<kbd>L</kbd>, or the button in the header) shows every DOM
+            event the browser produced — it survives page navigation, so multi-page flows stay traceable.</li>
+        <li><code>window.__testbed</code> gives automation a handle:
+            <code>ids()</code>, <code>value(id)</code>, <code>setValue(id, v)</code>, <code>click(id)</code>,
+            <code>state()</code>, <code>events()</code>, <code>features()</code>.</li>
+        <li><a href="./pages/features.html">Feature detection</a> reports which APIs this browser supports.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 style="font-size:18px;margin:30px 0 12px">Sections</h2>
+  <div class="tb-cards" id="section-cards" data-testid="home-cards"></div>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var wrap = document.getElementById('section-cards');
+  (window.TESTBED_PAGES || []).forEach(function (p) {
+    if (p.root) return;
+    var a = document.createElement('a');
+    a.className = 'tb-card';
+    a.href = './' + p.file;
+    a.setAttribute('data-testid', 'home-card-' + p.id);
+    a.innerHTML = '<b></b><span></span>';
+    a.querySelector('b').textContent = p.title;
+    a.querySelector('span').textContent = p.desc;
+    wrap.appendChild(a);
+  });
+  document.documentElement.setAttribute('data-page-script', 'ok');
+});
+</script>
+</body>
+</html>

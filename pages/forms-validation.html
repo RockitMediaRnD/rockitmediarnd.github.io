@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Validation &amp; submit — Browser Testbed</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/testbed.css">
+<script src="../assets/js/nav-data.js" defer></script>
+<script src="../assets/js/testbed.js" defer></script>
+<style>
+  input:user-invalid, textarea:user-invalid, select:user-invalid { border-color: var(--err); background: var(--err-soft); }
+  input:user-valid, textarea:user-valid, select:user-valid { border-color: var(--ok); }
+  .err { color: var(--err); font-size: 12.5px; min-height: 16px; }
+  .step { display: none; }
+  .step[data-active="true"] { display: block; }
+  .steps { display: flex; gap: 6px; margin-bottom: 14px; }
+  .steps span { flex: 1; height: 4px; border-radius: 2px; background: var(--border); }
+  .steps span[data-done="true"] { background: var(--accent); }
+</style>
+</head>
+<body data-page="forms-validation">
+<main class="tb-main" id="main">
+
+  <section class="tb-section">
+    <h2>Native constraint validation <small>the browser owns the bubble, the message and the focus jump</small></h2>
+    <div class="tb-section__body">
+      <form data-testid="val-native-form" novalidate="" id="native-form">
+        <p class="tb-note">This form is <b>not</b> <code>novalidate</code> — the attribute is removed on load so
+           you can compare. Submit with fields empty to see the browser's own validation UI.</p>
+        <div class="tb-grid">
+          <div class="tb-field">
+            <label for="v-email">Email (required, type=email)</label>
+            <input id="v-email" name="email" type="email" required data-testid="val-email">
+          </div>
+          <div class="tb-field">
+            <label for="v-age">Age (18–120, required)</label>
+            <input id="v-age" name="age" type="number" min="18" max="120" required data-testid="val-age">
+          </div>
+          <div class="tb-field">
+            <label for="v-code">Code (pattern [A-Z]{2}-\d{4})</label>
+            <input id="v-code" name="code" type="text" pattern="[A-Z]{2}-\d{4}"
+                   title="Two capitals, a dash, four digits" placeholder="UA-1234" data-testid="val-code">
+          </div>
+          <div class="tb-field">
+            <label for="v-confirm">Confirm email (custom validity)</label>
+            <input id="v-confirm" name="confirm" type="email" data-testid="val-confirm">
+            <span class="err" data-testid="val-confirm-error"></span>
+          </div>
+          <div class="tb-field">
+            <label for="v-bio">Bio (minlength 20)</label>
+            <textarea id="v-bio" name="bio" minlength="20" rows="2" data-testid="val-bio"></textarea>
+          </div>
+          <div class="tb-field">
+            <label for="v-country">Country (required select)</label>
+            <select id="v-country" name="country" required data-testid="val-country">
+              <option value="">— choose —</option><option>Ukraine</option><option>Poland</option><option>Germany</option>
+            </select>
+          </div>
+        </div>
+        <label class="tb-check" style="margin-top:12px">
+          <input type="checkbox" name="terms" required data-testid="val-terms">
+          <span>I accept the terms (required checkbox)</span>
+        </label>
+        <div class="tb-row" style="margin-top:14px">
+          <button class="tb-btn tb-btn--primary" type="submit" data-testid="val-submit">Submit</button>
+          <button class="tb-btn" type="reset" data-testid="val-reset">Reset</button>
+          <button class="tb-btn" type="button" data-testid="val-check">checkValidity()</button>
+          <button class="tb-btn" type="button" data-testid="val-report">reportValidity()</button>
+          <button class="tb-btn" type="submit" formnovalidate data-testid="val-submit-novalidate">Submit, formnovalidate</button>
+        </div>
+      </form>
+      <pre class="tb-out" data-testid="val-native-out" style="margin-top:12px"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Manual validation <small>no native UI — messages rendered and announced by the page</small></h2>
+    <div class="tb-section__body">
+      <form data-testid="val-manual-form" novalidate>
+        <div class="tb-grid">
+          <div class="tb-field">
+            <label for="m-user">Username (3–16, letters and digits)</label>
+            <input id="m-user" name="user" data-testid="val-manual-user" aria-describedby="m-user-err">
+            <span class="err" id="m-user-err" data-testid="val-manual-user-error" aria-live="polite"></span>
+          </div>
+          <div class="tb-field">
+            <label for="m-pass">Password (8+, one digit)</label>
+            <input id="m-pass" name="pass" type="password" autocomplete="new-password"
+                   data-testid="val-manual-pass" aria-describedby="m-pass-err">
+            <span class="err" id="m-pass-err" data-testid="val-manual-pass-error" aria-live="polite"></span>
+          </div>
+        </div>
+        <button class="tb-btn tb-btn--primary" type="submit" data-testid="val-manual-submit" style="margin-top:12px">Validate</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Real submits <small>the browser actually navigates or posts here</small></h2>
+    <div class="tb-section__body">
+      <p class="tb-note">The GET form reloads this page with a query string — the parsed result is shown below.
+         The POST form targets an iframe; a static host answers it with an error status, which is itself
+         worth looking at.</p>
+      <div class="tb-grid">
+        <form method="get" data-testid="val-get-form">
+          <div class="tb-field">
+            <label for="g-q">GET submit</label>
+            <input id="g-q" name="q" value="hello world" data-testid="val-get-input">
+            <input type="hidden" name="source" value="testbed">
+          </div>
+          <button class="tb-btn" type="submit" data-testid="val-get-submit" style="margin-top:8px">Submit as GET</button>
+        </form>
+        <form method="post" action="./forms-validation.html" target="post-frame"
+              enctype="application/x-www-form-urlencoded" data-testid="val-post-form">
+          <div class="tb-field">
+            <label for="p-q">POST submit (into iframe)</label>
+            <input id="p-q" name="q" value="posted value" data-testid="val-post-input">
+          </div>
+          <button class="tb-btn" type="submit" data-testid="val-post-submit" style="margin-top:8px">Submit as POST</button>
+        </form>
+      </div>
+      <div class="tb-field" style="margin-top:14px">
+        <span class="tb-label">Query string received by this document</span>
+        <pre class="tb-out" data-testid="val-query-out"></pre>
+      </div>
+      <iframe name="post-frame" data-testid="val-post-frame" title="POST response"
+              style="width:100%;height:150px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-sunken)"></iframe>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>FormData &amp; encodings</h2>
+    <div class="tb-section__body">
+      <form data-testid="val-fd-form" enctype="multipart/form-data">
+        <div class="tb-grid">
+          <div class="tb-field"><label for="fd-name">Name</label><input id="fd-name" name="name" value="Аліса" data-testid="val-fd-name"></div>
+          <div class="tb-field"><label for="fd-tags">Tags (repeated field)</label>
+            <select id="fd-tags" name="tag" multiple size="3" data-testid="val-fd-tags">
+              <option selected>alpha</option><option selected>beta</option><option>gamma</option>
+            </select></div>
+          <div class="tb-field"><label for="fd-file">File part</label><input id="fd-file" type="file" name="file" data-testid="val-fd-file"></div>
+        </div>
+        <div class="tb-row" style="margin-top:12px">
+          <button class="tb-btn" type="button" data-testid="val-fd-dump">Dump FormData</button>
+          <button class="tb-btn" type="button" data-testid="val-fd-urlencoded">As URLSearchParams</button>
+        </div>
+      </form>
+      <pre class="tb-out" data-testid="val-fd-out" style="margin-top:12px"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Autofill target <small>a conventional checkout form for exercising the browser's autofill</small></h2>
+    <div class="tb-section__body">
+      <p class="tb-note">Uses the standard <code>autocomplete</code> tokens a real checkout would.
+         Nothing is transmitted anywhere — submit is cancelled and the values are only echoed on this page.</p>
+      <form data-testid="val-autofill-form" autocomplete="on">
+        <div class="tb-grid">
+          <div class="tb-field"><label for="af-name">Full name</label><input id="af-name" name="name" autocomplete="name" data-testid="val-af-name"></div>
+          <div class="tb-field"><label for="af-email">Email</label><input id="af-email" type="email" name="email" autocomplete="email" data-testid="val-af-email"></div>
+          <div class="tb-field"><label for="af-tel">Phone</label><input id="af-tel" type="tel" name="tel" autocomplete="tel" data-testid="val-af-tel"></div>
+          <div class="tb-field"><label for="af-a1">Address line 1</label><input id="af-a1" name="address1" autocomplete="address-line1" data-testid="val-af-address1"></div>
+          <div class="tb-field"><label for="af-a2">Address line 2</label><input id="af-a2" name="address2" autocomplete="address-line2" data-testid="val-af-address2"></div>
+          <div class="tb-field"><label for="af-city">City</label><input id="af-city" name="city" autocomplete="address-level2" data-testid="val-af-city"></div>
+          <div class="tb-field"><label for="af-zip">Postal code</label><input id="af-zip" name="zip" autocomplete="postal-code" data-testid="val-af-zip"></div>
+          <div class="tb-field"><label for="af-country">Country</label><input id="af-country" name="country" autocomplete="country-name" data-testid="val-af-country"></div>
+          <div class="tb-field"><label for="af-cc">Card number</label><input id="af-cc" name="cc" inputmode="numeric" autocomplete="cc-number" data-testid="val-af-cc"></div>
+          <div class="tb-field"><label for="af-ccname">Name on card</label><input id="af-ccname" name="ccname" autocomplete="cc-name" data-testid="val-af-ccname"></div>
+          <div class="tb-field"><label for="af-exp">Expiry</label><input id="af-exp" name="exp" placeholder="MM/YY" autocomplete="cc-exp" data-testid="val-af-exp"></div>
+          <div class="tb-field"><label for="af-csc">CVC</label><input id="af-csc" name="csc" inputmode="numeric" autocomplete="cc-csc" data-testid="val-af-csc"></div>
+        </div>
+        <button class="tb-btn tb-btn--primary" type="submit" data-testid="val-af-submit" style="margin-top:14px">Pretend to pay</button>
+      </form>
+      <pre class="tb-out" data-testid="val-af-out" style="margin-top:12px"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Multi-step form <small>per-step validation, back and forward without navigating</small></h2>
+    <div class="tb-section__body">
+      <div class="steps" data-testid="val-steps"><span data-done="true"></span><span></span><span></span></div>
+      <form data-testid="val-wizard-form">
+        <div class="step" data-active="true" data-step="0">
+          <div class="tb-field"><label for="w1">Step 1 — your name (required)</label>
+            <input id="w1" required data-testid="val-wizard-name"></div>
+        </div>
+        <div class="step" data-step="1">
+          <div class="tb-field"><label for="w2">Step 2 — email (required)</label>
+            <input id="w2" type="email" required data-testid="val-wizard-email"></div>
+        </div>
+        <div class="step" data-step="2">
+          <div class="tb-field"><label for="w3">Step 3 — anything else</label>
+            <textarea id="w3" rows="3" data-testid="val-wizard-notes"></textarea></div>
+        </div>
+        <div class="tb-row" style="margin-top:14px">
+          <button class="tb-btn" type="button" data-testid="val-wizard-back">Back</button>
+          <button class="tb-btn tb-btn--primary" type="button" data-testid="val-wizard-next">Next</button>
+          <span class="tb-badge" data-testid="val-wizard-status">Step 1 of 3</span>
+        </div>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var q = function (id) { return document.querySelector('[data-testid="' + id + '"]'); };
+
+  /* ---------- native form ---------- */
+  var form = q('val-native-form');
+  form.removeAttribute('novalidate');
+  var out = q('val-native-out');
+
+  /* Reads validity state without calling checkValidity(): that call fires `invalid`
+     events, and this report is itself wired to them. */
+  function nativeReport() {
+    var rows = {};
+    var allValid = true;
+    Array.prototype.forEach.call(form.elements, function (n) {
+      if (!n.name) return;
+      var v = n.validity;
+      var flags = [];
+      ['valueMissing', 'typeMismatch', 'patternMismatch', 'tooShort', 'tooLong',
+       'rangeUnderflow', 'rangeOverflow', 'stepMismatch', 'badInput', 'customError']
+        .forEach(function (f) { if (v[f]) flags.push(f); });
+      if (!v.valid) allValid = false;
+      rows[n.name] = { valid: v.valid, flags: flags, message: n.validationMessage };
+    });
+    out.textContent = JSON.stringify({ formValid: allValid, fields: rows }, null, 2);
+  }
+
+  var confirmField = q('val-confirm');
+  function checkConfirm() {
+    var a = q('val-email').value, b = confirmField.value;
+    var msg = (b && a !== b) ? 'The two email addresses do not match.' : '';
+    confirmField.setCustomValidity(msg);
+    q('val-confirm-error').textContent = msg;
+  }
+  confirmField.addEventListener('input', function () { checkConfirm(); nativeReport(); });
+  q('val-email').addEventListener('input', function () { checkConfirm(); nativeReport(); });
+
+  form.addEventListener('input', nativeReport);
+  form.addEventListener('change', nativeReport);
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    alert('Native form passed validation and would submit now.');
+  });
+  form.addEventListener('reset', function () { setTimeout(nativeReport, 0); });
+  q('val-check').addEventListener('click', function () {
+    var valid = form.checkValidity();   // fires `invalid` events, shows no UI
+    setTimeout(function () {
+      alert('checkValidity() -> ' + valid + '\n(no UI is shown by this call)');
+    }, 0);
+    nativeReport();
+  });
+  q('val-report').addEventListener('click', function () { form.reportValidity(); nativeReport(); });
+  nativeReport();
+
+  /* ---------- manual validation ---------- */
+  var mForm = q('val-manual-form');
+  function manualCheck(showAll) {
+    var ok = true;
+    var user = q('val-manual-user'), pass = q('val-manual-pass');
+    var uErr = /^[A-Za-z0-9]{3,16}$/.test(user.value) ? '' : '3–16 letters or digits.';
+    var pErr = (pass.value.length >= 8 && /\d/.test(pass.value)) ? '' : 'At least 8 characters including a digit.';
+    if (showAll || user.value) { q('val-manual-user-error').textContent = uErr; }
+    if (showAll || pass.value) { q('val-manual-pass-error').textContent = pErr; }
+    ok = !uErr && !pErr;
+    return ok;
+  }
+  mForm.addEventListener('input', function () { manualCheck(false); });
+  mForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (manualCheck(true)) alert('Manual validation passed.');
+    else {
+      var bad = mForm.querySelector('.err:not(:empty)');
+      if (bad) mForm.querySelector('#' + bad.id.replace('-err', '')).focus();
+    }
+  });
+
+  /* ---------- query string ---------- */
+  var params = new URLSearchParams(location.search);
+  var qOut = q('val-query-out');
+  if (params.toString()) {
+    var obj = {};
+    params.forEach(function (v, k) { obj[k] = v; });
+    qOut.textContent = JSON.stringify({ search: location.search, parsed: obj }, null, 2);
+  } else {
+    qOut.textContent = 'No query string. Submit the GET form to add one.';
+  }
+
+  /* ---------- FormData ---------- */
+  var fdForm = q('val-fd-form'), fdOut = q('val-fd-out');
+  q('val-fd-dump').addEventListener('click', function () {
+    var fd = new FormData(fdForm), lines = [];
+    fd.forEach(function (v, k) {
+      lines.push(k + ' = ' + (v instanceof File
+        ? 'File(' + JSON.stringify(v.name) + ', ' + v.size + ' bytes, ' + (v.type || 'no type') + ')'
+        : JSON.stringify(v)));
+    });
+    fdOut.textContent = lines.join('\n') || '(empty)';
+  });
+  q('val-fd-urlencoded').addEventListener('click', function () {
+    var fd = new FormData(fdForm), sp = new URLSearchParams();
+    fd.forEach(function (v, k) { if (!(v instanceof File)) sp.append(k, v); });
+    fdOut.textContent = sp.toString() || '(empty)';
+  });
+
+  /* ---------- autofill echo ---------- */
+  q('val-autofill-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var fd = new FormData(e.target), o = {};
+    fd.forEach(function (v, k) { o[k] = v; });
+    q('val-af-out').textContent = 'Nothing was sent anywhere. Values captured:\n' + JSON.stringify(o, null, 2);
+  });
+
+  /* ---------- wizard ---------- */
+  var step = 0;
+  var steps = Array.prototype.slice.call(document.querySelectorAll('.step'));
+  var bars = Array.prototype.slice.call(q('val-steps').children);
+  function paint() {
+    steps.forEach(function (s, i) { s.setAttribute('data-active', String(i === step)); });
+    bars.forEach(function (b, i) { b.setAttribute('data-done', String(i <= step)); });
+    q('val-wizard-status').textContent = 'Step ' + (step + 1) + ' of ' + steps.length;
+    q('val-wizard-next').textContent = step === steps.length - 1 ? 'Finish' : 'Next';
+    q('val-wizard-back').disabled = step === 0;
+  }
+  q('val-wizard-next').addEventListener('click', function () {
+    var field = steps[step].querySelector('input, textarea');
+    if (field && !field.checkValidity()) { field.reportValidity(); return; }
+    if (step === steps.length - 1) { alert('Wizard finished.'); return; }
+    step++; paint();
+  });
+  q('val-wizard-back').addEventListener('click', function () { if (step > 0) { step--; paint(); } });
+  paint();
+  document.documentElement.setAttribute('data-page-script', 'ok');
+});
+</script>
+</body>
+</html>

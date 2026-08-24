@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pickers &amp; calendars — Browser Testbed</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/testbed.css">
+<script src="../assets/js/nav-data.js" defer></script>
+<script src="../assets/js/testbed.js" defer></script>
+<style>
+  .cal { width: 300px; border:1px solid var(--border); border-radius:var(--radius); background:var(--bg-elev); padding:10px; }
+  .cal__head { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+  .cal__head strong { flex:1; text-align:center; font-size:14px; }
+  .cal__grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+  .cal__dow { font-size:11px; color:var(--fg-faint); text-align:center; padding:4px 0; }
+  .cal__day { aspect-ratio:1; border:0; background:none; border-radius:var(--radius-sm);
+              font:inherit; font-size:13px; color:var(--fg); cursor:pointer; }
+  .cal__day:hover:not(:disabled) { background:var(--bg-sunken); }
+  .cal__day[data-out="true"] { color:var(--fg-faint); }
+  .cal__day:disabled { opacity:.3; cursor:not-allowed; }
+  .cal__day[data-today="true"] { box-shadow: inset 0 0 0 1px var(--accent); }
+  .cal__day[data-sel="true"] { background:var(--accent); color:var(--accent-fg); }
+  .cal__day[data-in-range="true"] { background:var(--accent-soft); color:var(--accent); border-radius:0; }
+  .timewheel { display:flex; gap:8px; }
+  .timewheel select { width:auto; }
+</style>
+</head>
+<body data-page="forms-pickers">
+<main class="tb-main" id="main">
+
+  <section class="tb-section">
+    <h2>Native pickers <small>the browser supplies the whole popup UI here</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-grid">
+        <div class="tb-field"><label for="p-date">date</label>
+          <input id="p-date" type="date" data-testid="pick-date" value="2026-08-24"></div>
+        <div class="tb-field"><label for="p-time">time</label>
+          <input id="p-time" type="time" data-testid="pick-time" value="14:30"></div>
+        <div class="tb-field"><label for="p-time-sec">time with seconds (step=1)</label>
+          <input id="p-time-sec" type="time" step="1" data-testid="pick-time-seconds" value="14:30:15"></div>
+        <div class="tb-field"><label for="p-dt">datetime-local</label>
+          <input id="p-dt" type="datetime-local" data-testid="pick-datetime" value="2026-08-24T14:30"></div>
+        <div class="tb-field"><label for="p-month">month</label>
+          <input id="p-month" type="month" data-testid="pick-month" value="2026-08"></div>
+        <div class="tb-field"><label for="p-week">week</label>
+          <input id="p-week" type="week" data-testid="pick-week" value="2026-W35"></div>
+        <div class="tb-field"><label for="p-color">color</label>
+          <input id="p-color" type="color" data-testid="pick-color" value="#c22b2b" style="height:38px;padding:2px"></div>
+        <div class="tb-field"><label for="p-date-bounds">date with min/max &amp; step=7</label>
+          <input id="p-date-bounds" type="date" data-testid="pick-date-bounded"
+                 min="2026-08-01" max="2026-12-31" step="7" value="2026-08-07">
+          <span class="tb-hint">Out-of-range values must fail validation.</span></div>
+        <div class="tb-field"><label for="p-date-required">required &amp; empty</label>
+          <input id="p-date-required" type="date" data-testid="pick-date-required" required></div>
+        <div class="tb-field"><label for="p-date-readonly">readonly</label>
+          <input id="p-date-readonly" type="date" data-testid="pick-date-readonly" readonly value="2026-01-01"></div>
+      </div>
+      <div class="tb-row" style="margin-top:14px">
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="pick-showpicker">showPicker() on the date field</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="pick-set-today">Set date to today</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="pick-clear">Clear all native pickers</button>
+      </div>
+      <pre class="tb-out" data-testid="pick-native-out" style="margin-top:12px"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Custom calendar <small>single date, or a range across two months</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-row" style="align-items:flex-start;gap:24px">
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">Single date</div>
+          <div class="cal" id="cal-single" data-testid="pick-cal-single"></div>
+          <p class="tb-hint" style="margin-top:6px">Selected: <b data-testid="pick-cal-single-value">—</b></p>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">Range (weekends disabled)</div>
+          <div class="cal" id="cal-range" data-testid="pick-cal-range"></div>
+          <p class="tb-hint" style="margin-top:6px">Range: <b data-testid="pick-cal-range-value">—</b></p>
+        </div>
+        <div style="min-width:220px">
+          <div class="tb-label" style="margin-bottom:6px">Locale &amp; first day of week</div>
+          <div class="tb-stack">
+            <select data-testid="pick-cal-locale" aria-label="Calendar locale">
+              <option value="en-US">en-US</option>
+              <option value="uk-UA" selected>uk-UA</option>
+              <option value="de-DE">de-DE</option>
+              <option value="ja-JP">ja-JP</option>
+              <option value="ar-EG">ar-EG</option>
+            </select>
+            <select data-testid="pick-cal-firstday" aria-label="First day of week">
+              <option value="1" selected>Monday first</option>
+              <option value="0">Sunday first</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Custom time &amp; timezone</h2>
+    <div class="tb-section__body">
+      <div class="tb-grid">
+        <div class="tb-field">
+          <span class="tb-label">Hour / minute wheels</span>
+          <div class="timewheel">
+            <select data-testid="pick-hour" aria-label="Hour"></select>
+            <select data-testid="pick-minute" aria-label="Minute"></select>
+            <select data-testid="pick-ampm" aria-label="AM or PM"><option>AM</option><option>PM</option></select>
+          </div>
+        </div>
+        <div class="tb-field">
+          <label for="tz">Timezone</label>
+          <select id="tz" data-testid="pick-timezone"></select>
+        </div>
+        <div class="tb-field">
+          <label for="dur">Duration (minutes)</label>
+          <input id="dur" type="number" min="0" max="1440" step="15" value="90" data-testid="pick-duration">
+        </div>
+      </div>
+      <pre class="tb-out" data-testid="pick-custom-out" style="margin-top:12px"></pre>
+    </div>
+  </section>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var q = function (id) { return document.querySelector('[data-testid="' + id + '"]'); };
+  var pad = function (n) { return String(n).padStart(2, '0'); };
+  var iso = function (d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+
+  /* ---------- native pickers ---------- */
+  var nativeIds = ['pick-date', 'pick-time', 'pick-time-seconds', 'pick-datetime', 'pick-month',
+                   'pick-week', 'pick-color', 'pick-date-bounded', 'pick-date-required'];
+  function nativeReport() {
+    var o = {};
+    nativeIds.forEach(function (id) {
+      var n = q(id);
+      o[id] = { value: n.value, valid: n.checkValidity(), valueAsNumber: isNaN(n.valueAsNumber) ? null : n.valueAsNumber };
+    });
+    q('pick-native-out').textContent = JSON.stringify(o, null, 2);
+  }
+  nativeIds.forEach(function (id) { q(id).addEventListener('input', nativeReport); });
+  q('pick-showpicker').addEventListener('click', function () {
+    var n = q('pick-date');
+    if (typeof n.showPicker === 'function') {
+      try { n.showPicker(); } catch (e) { alert('showPicker() threw: ' + e.message); }
+    } else { alert('showPicker() is not supported in this browser.'); }
+  });
+  q('pick-set-today').addEventListener('click', function () {
+    q('pick-date').value = iso(new Date()); nativeReport();
+  });
+  q('pick-clear').addEventListener('click', function () {
+    nativeIds.forEach(function (id) { if (q(id).type !== 'color') q(id).value = ''; });
+    nativeReport();
+  });
+  nativeReport();
+
+  /* ---------- custom calendar ---------- */
+  function Calendar(root, opts) {
+    var view = new Date();
+    var sel = null, from = null, to = null;
+    var locale = 'uk-UA', firstDay = 1;
+
+    function fmt(d) { return new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(d); }
+    function dowNames() {
+      var f = new Intl.DateTimeFormat(locale, { weekday: 'short' });
+      var out = [];
+      for (var i = 0; i < 7; i++) {
+        var d = new Date(2024, 0, 7 + ((i + firstDay) % 7)); // 2024-01-07 is a Sunday
+        out.push(f.format(d));
+      }
+      return out;
+    }
+    function draw() {
+      root.textContent = '';
+      var head = document.createElement('div');
+      head.className = 'cal__head';
+      var prev = document.createElement('button');
+      prev.className = 'tb-btn tb-btn--sm'; prev.type = 'button'; prev.textContent = '‹';
+      prev.setAttribute('data-testid', opts.id + '-prev'); prev.setAttribute('aria-label', 'Previous month');
+      var next = document.createElement('button');
+      next.className = 'tb-btn tb-btn--sm'; next.type = 'button'; next.textContent = '›';
+      next.setAttribute('data-testid', opts.id + '-next'); next.setAttribute('aria-label', 'Next month');
+      var label = document.createElement('strong');
+      label.setAttribute('data-testid', opts.id + '-label');
+      label.textContent = fmt(view);
+      prev.addEventListener('click', function () { view = new Date(view.getFullYear(), view.getMonth() - 1, 1); draw(); });
+      next.addEventListener('click', function () { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); draw(); });
+      head.appendChild(prev); head.appendChild(label); head.appendChild(next);
+      root.appendChild(head);
+
+      var grid = document.createElement('div');
+      grid.className = 'cal__grid';
+      grid.setAttribute('role', 'grid');
+      dowNames().forEach(function (n) {
+        var c = document.createElement('div'); c.className = 'cal__dow'; c.textContent = n; grid.appendChild(c);
+      });
+      var first = new Date(view.getFullYear(), view.getMonth(), 1);
+      var offset = (first.getDay() - firstDay + 7) % 7;
+      var start = new Date(first); start.setDate(1 - offset);
+      var today = iso(new Date());
+      for (var i = 0; i < 42; i++) {
+        var d = new Date(start); d.setDate(start.getDate() + i);
+        var key = iso(d);
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'cal__day'; b.textContent = d.getDate();
+        b.setAttribute('data-testid', opts.id + '-day-' + key);
+        b.setAttribute('data-out', String(d.getMonth() !== view.getMonth()));
+        if (key === today) b.setAttribute('data-today', 'true');
+        if (opts.disableWeekends && (d.getDay() === 0 || d.getDay() === 6)) b.disabled = true;
+        if (opts.range) {
+          if (key === from || key === to) b.setAttribute('data-sel', 'true');
+          else if (from && to && key > from && key < to) b.setAttribute('data-in-range', 'true');
+        } else if (key === sel) b.setAttribute('data-sel', 'true');
+        b.addEventListener('click', (function (key) {
+          return function () {
+            if (opts.range) {
+              if (!from || (from && to)) { from = key; to = null; }
+              else if (key < from) { to = from; from = key; }
+              else { to = key; }
+              q(opts.id + '-value').textContent = from ? (from + (to ? ' → ' + to : ' → …')) : '—';
+            } else {
+              sel = key;
+              q(opts.id + '-value').textContent = key;
+            }
+            draw();
+          };
+        })(key));
+        grid.appendChild(b);
+      }
+      root.appendChild(grid);
+    }
+    this.setLocale = function (l, f) { locale = l; firstDay = f; draw(); };
+    draw();
+  }
+
+  var calSingle = new Calendar(document.getElementById('cal-single'), { id: 'pick-cal-single' });
+  var calRange = new Calendar(document.getElementById('cal-range'), { id: 'pick-cal-range', range: true, disableWeekends: true });
+  function applyLocale() {
+    var l = q('pick-cal-locale').value, f = +q('pick-cal-firstday').value;
+    calSingle.setLocale(l, f); calRange.setLocale(l, f);
+  }
+  q('pick-cal-locale').addEventListener('change', applyLocale);
+  q('pick-cal-firstday').addEventListener('change', applyLocale);
+
+  /* ---------- custom time & timezone ---------- */
+  var hour = q('pick-hour'), minute = q('pick-minute');
+  for (var h = 1; h <= 12; h++) hour.appendChild(new Option(pad(h), h));
+  for (var m = 0; m < 60; m += 5) minute.appendChild(new Option(pad(m), m));
+  var zones = ['UTC', 'Europe/Kyiv', 'Europe/Berlin', 'Europe/London', 'America/New_York',
+               'America/Los_Angeles', 'Asia/Tokyo', 'Asia/Shanghai', 'Australia/Sydney'];
+  var tz = q('pick-timezone');
+  var local = (Intl.DateTimeFormat().resolvedOptions() || {}).timeZone;
+  if (local && zones.indexOf(local) === -1) zones.unshift(local);
+  zones.forEach(function (z) { tz.appendChild(new Option(z, z)); });
+  if (local) tz.value = local;
+
+  function customReport() {
+    var when;
+    try {
+      when = new Intl.DateTimeFormat('en-GB', {
+        timeZone: tz.value, dateStyle: 'medium', timeStyle: 'long'
+      }).format(new Date());
+    } catch (e) { when = 'Intl failed: ' + e.message; }
+    q('pick-custom-out').textContent = JSON.stringify({
+      time: hour.value + ':' + pad(minute.value) + ' ' + q('pick-ampm').value,
+      timezone: tz.value,
+      nowInZone: when,
+      durationMinutes: +q('pick-duration').value,
+      resolvedLocale: Intl.DateTimeFormat().resolvedOptions().locale
+    }, null, 2);
+  }
+  ['pick-hour', 'pick-minute', 'pick-ampm', 'pick-timezone', 'pick-duration']
+    .forEach(function (id) { q(id).addEventListener('change', customReport); });
+  customReport();
+  document.documentElement.setAttribute('data-page-script', 'ok');
+});
+</script>
+</body>
+</html>

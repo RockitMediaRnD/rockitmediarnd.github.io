@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Accessibility — Browser Testbed</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/testbed.css">
+<script src="../assets/js/nav-data.js" defer></script>
+<script src="../assets/js/testbed.js" defer></script>
+<style>
+  .contrast-row { display:flex; gap:10px; flex-wrap:wrap; }
+  .swatch { padding:10px 14px; border-radius:var(--radius-sm); font-size:13.5px; font-weight:600; }
+  .skip { position:absolute; left:-9999px; top:0; background:var(--accent); color:#fff;
+          padding:8px 14px; border-radius:0 0 var(--radius-sm) 0; z-index:100; }
+  .skip:focus { left:0; }
+  .motion-box { width:64px; height:64px; border-radius:var(--radius-sm); background:var(--accent);
+                animation:slide 2s ease-in-out infinite alternate; }
+  @keyframes slide { to { transform:translateX(150px); } }
+  @media (prefers-reduced-motion: reduce) { .motion-box { animation:none; } }
+  .forced-demo { border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px;
+                 forced-color-adjust:auto; }
+</style>
+</head>
+<body data-page="a11y">
+<a class="skip" href="#a11y-content" data-testid="a11y-skip">Skip to the main content</a>
+<main class="tb-main" id="main">
+<div id="a11y-content"></div>
+
+  <section class="tb-section">
+    <h2>Landmarks &amp; roles <small>the structure a screen reader navigates by</small></h2>
+    <div class="tb-section__body">
+      <p class="tb-note">This document has a <code>banner</code> (the site header), a
+         <code>navigation</code> (the sidebar), a <code>main</code>, and the regions below.
+         Each section here is a labelled <code>region</code>.</p>
+      <div class="tb-grid">
+        <section aria-labelledby="lm-1" data-testid="a11y-region-1"
+                 style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px">
+          <h3 id="lm-1" style="margin:0 0 6px;font-size:14px">Labelled region</h3>
+          <p style="margin:0;font-size:13.5px;color:var(--fg-muted)">Announced by its heading.</p>
+        </section>
+        <aside aria-label="Complementary content" data-testid="a11y-aside"
+               style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px">
+          <b style="font-size:14px">complementary</b>
+          <p style="margin:6px 0 0;font-size:13.5px;color:var(--fg-muted)">An aside with an aria-label.</p>
+        </aside>
+        <search data-testid="a11y-search" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px">
+          <label for="a11y-q" class="tb-label">Search landmark</label>
+          <input id="a11y-q" type="search" data-testid="a11y-search-input" placeholder="Search…">
+        </search>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Names, descriptions and labelling</h2>
+    <div class="tb-section__body">
+      <div class="tb-grid">
+        <div class="tb-field">
+          <label for="a11y-lbl">Explicit &lt;label for&gt;</label>
+          <input id="a11y-lbl" data-testid="a11y-label-explicit">
+        </div>
+        <div class="tb-field">
+          <label>Wrapping label <input data-testid="a11y-label-implicit"></label>
+        </div>
+        <div class="tb-field">
+          <span class="tb-label" id="a11y-lb">aria-labelledby</span>
+          <input aria-labelledby="a11y-lb" data-testid="a11y-label-labelledby">
+        </div>
+        <div class="tb-field">
+          <input aria-label="Field named only by aria-label" data-testid="a11y-label-arialabel" placeholder="aria-label only">
+        </div>
+        <div class="tb-field">
+          <label for="a11y-desc">With a description</label>
+          <input id="a11y-desc" aria-describedby="a11y-desc-help" data-testid="a11y-label-described">
+          <span class="tb-hint" id="a11y-desc-help">This help text is referenced by aria-describedby.</span>
+        </div>
+        <div class="tb-field">
+          <label for="a11y-bad" style="color:var(--err)">Unlabelled on purpose (a defect to detect)</label>
+          <input id="a11y-bad2" data-testid="a11y-label-missing" placeholder="No accessible name">
+        </div>
+        <div class="tb-field">
+          <span class="tb-label">Required &amp; invalid state</span>
+          <input aria-label="Required field" required aria-required="true" aria-invalid="true"
+                 data-testid="a11y-invalid" value="not an email">
+          <span class="tb-hint" role="alert" data-testid="a11y-invalid-msg">Enter a valid email address.</span>
+        </div>
+        <div class="tb-field">
+          <span class="tb-label">Icon-only buttons</span>
+          <div class="tb-row">
+            <button class="tb-btn tb-btn--sm" type="button" aria-label="Delete item" data-testid="a11y-icon-good">🗑</button>
+            <button class="tb-btn tb-btn--sm" type="button" data-testid="a11y-icon-bad">🗑</button>
+            <span class="tb-hint">Second one has no accessible name.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Live regions <small>announcements without moving focus</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-row" style="margin-bottom:12px">
+        <button class="tb-btn" type="button" data-testid="a11y-live-polite">Announce politely</button>
+        <button class="tb-btn" type="button" data-testid="a11y-live-assertive">Announce assertively</button>
+        <button class="tb-btn" type="button" data-testid="a11y-live-status">Update status</button>
+        <button class="tb-btn" type="button" data-testid="a11y-live-alert">Fire an alert</button>
+        <button class="tb-btn" type="button" data-testid="a11y-live-busy">Toggle aria-busy</button>
+      </div>
+      <div class="tb-stack">
+        <div aria-live="polite" data-testid="a11y-region-polite" class="tb-out">polite region — idle</div>
+        <div aria-live="assertive" data-testid="a11y-region-assertive" class="tb-out">assertive region — idle</div>
+        <div role="status" data-testid="a11y-region-status" class="tb-out">role=status — idle</div>
+        <div role="alert" data-testid="a11y-region-alert" class="tb-out" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Widget roles &amp; state <small>ARIA on top of non-semantic markup</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-grid">
+        <div>
+          <span class="tb-label">div acting as a button</span>
+          <div role="button" tabindex="0" data-testid="a11y-fake-button"
+               style="margin-top:6px;padding:7px 14px;border:1px solid var(--border-strong);border-radius:6px;display:inline-block;cursor:pointer">
+            Press with Enter or Space</div>
+        </div>
+        <div>
+          <span class="tb-label">Toggle button with aria-pressed</span>
+          <button class="tb-btn" type="button" aria-pressed="false" data-testid="a11y-toggle" style="margin-top:6px">Muted: off</button>
+        </div>
+        <div>
+          <span class="tb-label">Disclosure with aria-expanded</span>
+          <button class="tb-btn" type="button" aria-expanded="false" aria-controls="a11y-disclosure"
+                  data-testid="a11y-disclosure-btn" style="margin-top:6px">Show details</button>
+          <div id="a11y-disclosure" hidden data-testid="a11y-disclosure" style="margin-top:8px;font-size:13.5px;color:var(--fg-muted)">
+            Disclosure content revealed.</div>
+        </div>
+        <div>
+          <span class="tb-label">Slider role with keyboard support</span>
+          <div role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="40"
+               aria-label="Custom slider" data-testid="a11y-slider"
+               style="margin-top:6px;height:26px;border:1px solid var(--border-strong);border-radius:13px;position:relative">
+            <div data-testid="a11y-slider-fill" style="position:absolute;inset:2px auto 2px 2px;width:40%;background:var(--accent);border-radius:11px"></div>
+          </div>
+          <span class="tb-hint">Arrow keys, Home and End should move it.</span>
+        </div>
+        <div>
+          <span class="tb-label">Progressbar role</span>
+          <div role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="65"
+               aria-label="Upload progress" data-testid="a11y-progressbar"
+               style="margin-top:6px;height:10px;border-radius:5px;background:var(--bg-sunken)">
+            <div style="width:65%;height:100%;border-radius:5px;background:var(--ok)"></div></div>
+        </div>
+        <div>
+          <span class="tb-label">Hidden from assistive tech</span>
+          <div aria-hidden="true" data-testid="a11y-hidden" style="margin-top:6px;font-size:13.5px;color:var(--fg-muted)">
+            Decorative text — visible but not announced.</div>
+          <span class="tb-sr-only" data-testid="a11y-sronly">Screen-reader-only text: announced but not painted.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Contrast, motion and forced colours</h2>
+    <div class="tb-section__body">
+      <div class="contrast-row" data-testid="a11y-contrast">
+        <span class="swatch" style="background:#2f6df6;color:#fff">Contrast 4.8 : 1</span>
+        <span class="swatch" style="background:#dfe6f6;color:#5c7fd0">Low contrast 2.1 : 1</span>
+        <span class="swatch" style="background:#111;color:#fff">15.9 : 1</span>
+        <span class="swatch" style="background:#f6f7f9;color:#c9ccd2">Fails WCAG AA</span>
+      </div>
+      <div class="tb-row" style="margin-top:16px;align-items:center;gap:20px">
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">Motion (respects prefers-reduced-motion)</div>
+          <div class="motion-box" data-testid="a11y-motion"></div>
+        </div>
+        <div class="forced-demo" data-testid="a11y-forced">
+          <b style="font-size:13.5px">Forced colours</b>
+          <p style="margin:6px 0 0;font-size:13px;color:var(--fg-muted)">
+            In a high-contrast mode the browser replaces these colours.</p>
+        </div>
+      </div>
+      <pre class="tb-out" data-testid="a11y-prefs-out" style="margin-top:14px"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Keyboard-only walkthrough</h2>
+    <div class="tb-section__body">
+      <p class="tb-note">Put the mouse down and drive the whole page with <kbd>Tab</kbd>,
+         <kbd>Shift</kbd>+<kbd>Tab</kbd>, <kbd>Enter</kbd>, <kbd>Space</kbd> and the arrow keys.
+         The live readout below names whatever currently has focus.</p>
+      <pre class="tb-out" data-testid="a11y-focus-out">Nothing focused yet.</pre>
+      <div class="tb-row" style="margin-top:10px">
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="a11y-audit">Run a quick self-audit</button>
+      </div>
+      <pre class="tb-out" data-testid="a11y-audit-out" style="margin-top:10px"></pre>
+    </div>
+  </section>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var q = function (id) { return document.querySelector('[data-testid="' + id + '"]'); };
+  var stamp = function () { return new Date().toLocaleTimeString(); };
+
+  q('a11y-live-polite').addEventListener('click', function () {
+    q('a11y-region-polite').textContent = 'polite update at ' + stamp();
+  });
+  q('a11y-live-assertive').addEventListener('click', function () {
+    q('a11y-region-assertive').textContent = 'assertive update at ' + stamp();
+  });
+  q('a11y-live-status').addEventListener('click', function () {
+    q('a11y-region-status').textContent = 'status: saved at ' + stamp();
+  });
+  q('a11y-live-alert').addEventListener('click', function () {
+    var a = q('a11y-region-alert');
+    a.hidden = false;
+    a.textContent = 'Alert: something needed attention at ' + stamp();
+  });
+  var busy = false;
+  q('a11y-live-busy').addEventListener('click', function () {
+    busy = !busy;
+    q('a11y-region-polite').setAttribute('aria-busy', String(busy));
+    q('a11y-region-polite').textContent = 'aria-busy=' + busy + ' — updates are ' + (busy ? 'suppressed' : 'announced');
+  });
+
+  var fake = q('a11y-fake-button');
+  function pressFake() { q('a11y-region-status').textContent = 'Fake button activated at ' + stamp(); }
+  fake.addEventListener('click', pressFake);
+  fake.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pressFake(); }
+  });
+
+  var toggle = q('a11y-toggle');
+  toggle.addEventListener('click', function () {
+    var on = toggle.getAttribute('aria-pressed') !== 'true';
+    toggle.setAttribute('aria-pressed', String(on));
+    toggle.textContent = 'Muted: ' + (on ? 'on' : 'off');
+  });
+
+  var disc = q('a11y-disclosure-btn');
+  disc.addEventListener('click', function () {
+    var open = disc.getAttribute('aria-expanded') !== 'true';
+    disc.setAttribute('aria-expanded', String(open));
+    q('a11y-disclosure').hidden = !open;
+    disc.textContent = open ? 'Hide details' : 'Show details';
+  });
+
+  var slider = q('a11y-slider'), fill = q('a11y-slider-fill');
+  slider.addEventListener('keydown', function (e) {
+    var v = +slider.getAttribute('aria-valuenow');
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') v = Math.min(100, v + 5);
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') v = Math.max(0, v - 5);
+    else if (e.key === 'Home') v = 0;
+    else if (e.key === 'End') v = 100;
+    else if (e.key === 'PageUp') v = Math.min(100, v + 20);
+    else if (e.key === 'PageDown') v = Math.max(0, v - 20);
+    else return;
+    e.preventDefault();
+    slider.setAttribute('aria-valuenow', v);
+    slider.setAttribute('aria-valuetext', v + ' percent');
+    fill.style.width = v + '%';
+    q('a11y-region-status').textContent = 'Slider is at ' + v;
+  });
+
+  function prefs() {
+    var mq = ['prefers-reduced-motion: reduce', 'prefers-contrast: more', 'prefers-contrast: less',
+              'forced-colors: active', 'prefers-color-scheme: dark', 'prefers-reduced-transparency: reduce',
+              'inverted-colors: inverted', 'pointer: coarse'];
+    q('a11y-prefs-out').textContent = mq.map(function (m) {
+      return (matchMedia('(' + m + ')').matches ? '✓ ' : '· ') + m;
+    }).join('\n');
+  }
+  prefs();
+  setInterval(prefs, 2000);
+
+  document.addEventListener('focusin', function (e) {
+    var n = e.target;
+    var name = n.getAttribute('aria-label') ||
+      (n.labels && n.labels[0] && n.labels[0].textContent.trim()) ||
+      (n.getAttribute('aria-labelledby') &&
+        (document.getElementById(n.getAttribute('aria-labelledby')) || {}).textContent) ||
+      n.textContent.trim().slice(0, 40) || '(no accessible name)';
+    q('a11y-focus-out').textContent = JSON.stringify({
+      tag: n.tagName.toLowerCase(),
+      role: n.getAttribute('role') || '(implicit)',
+      testid: n.getAttribute('data-testid'),
+      accessibleName: name,
+      tabIndex: n.tabIndex,
+      disabled: !!n.disabled,
+      state: {
+        expanded: n.getAttribute('aria-expanded'),
+        pressed: n.getAttribute('aria-pressed'),
+        valuenow: n.getAttribute('aria-valuenow'),
+        invalid: n.getAttribute('aria-invalid')
+      }
+    }, null, 2);
+  });
+
+  q('a11y-audit').addEventListener('click', function () {
+    var issues = [];
+    document.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(function (n) {
+      var named = n.getAttribute('aria-label') || n.getAttribute('aria-labelledby') ||
+        (n.labels && n.labels.length) || n.getAttribute('title');
+      if (!named) issues.push('unlabelled control: ' + (n.getAttribute('data-testid') || n.outerHTML.slice(0, 50)));
+    });
+    document.querySelectorAll('button, a[href]').forEach(function (n) {
+      var text = (n.textContent || '').trim();
+      var named = n.getAttribute('aria-label') || n.getAttribute('title') || text.replace(/[^\wЀ-ӿ]/g, '');
+      if (!named) issues.push('control without an accessible name: ' + (n.getAttribute('data-testid') || n.tagName));
+    });
+    document.querySelectorAll('img').forEach(function (n) {
+      if (!n.hasAttribute('alt')) issues.push('image without alt: ' + (n.getAttribute('src') || '').split('/').pop());
+    });
+    var levels = Array.prototype.map.call(document.querySelectorAll('h1,h2,h3,h4,h5,h6'), function (h) {
+      return +h.tagName[1];
+    });
+    for (var i = 1; i < levels.length; i++) {
+      if (levels[i] - levels[i - 1] > 1) { issues.push('heading level jumps from h' + levels[i - 1] + ' to h' + levels[i]); break; }
+    }
+    q('a11y-audit-out').textContent = issues.length
+      ? 'Findings (some are deliberate on this page):\n• ' + issues.join('\n• ')
+      : 'No issues found by this rough check.';
+  });
+  document.documentElement.setAttribute('data-page-script', 'ok');
+});
+</script>
+</body>
+</html>

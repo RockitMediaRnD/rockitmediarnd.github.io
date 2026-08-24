@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Selection controls — Browser Testbed</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/testbed.css">
+<script src="../assets/js/nav-data.js" defer></script>
+<script src="../assets/js/testbed.js" defer></script>
+<style>
+  .chip { display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:999px;
+          background:var(--accent-soft); color:var(--accent); font-size:13px; font-weight:550; }
+  .chip button { border:0; background:none; color:inherit; cursor:pointer; font-size:14px; line-height:1; padding:0; }
+  .combo { position:relative; }
+  .combo__list { position:absolute; z-index:20; top:100%; left:0; right:0; margin-top:4px; max-height:220px;
+                 overflow:auto; background:var(--bg-elev); border:1px solid var(--border-strong);
+                 border-radius:var(--radius-sm); box-shadow:var(--shadow); padding:4px; }
+  .combo__list[hidden] { display:none; }
+  .combo__opt { padding:6px 9px; border-radius:4px; font-size:14px; cursor:pointer; }
+  .combo__opt[aria-selected="true"], .combo__opt:hover { background:var(--accent-soft); color:var(--accent); }
+  .dual { position:relative; height:34px; }
+  .dual input { position:absolute; left:0; width:100%; margin:0; pointer-events:none; background:none; }
+  .dual input::-webkit-slider-thumb { pointer-events:auto; }
+  .dual input::-moz-range-thumb { pointer-events:auto; }
+</style>
+</head>
+<body data-page="forms-selection">
+<main class="tb-main" id="main">
+
+  <section class="tb-section">
+    <h2>Checkboxes &amp; radios</h2>
+    <div class="tb-section__body">
+      <div class="tb-grid">
+        <fieldset style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px">
+          <legend style="font-size:12px;color:var(--fg-faint)">Checkbox states</legend>
+          <div class="tb-stack">
+            <label class="tb-check"><input type="checkbox" data-testid="sel-cb-plain"> <span>Unchecked</span></label>
+            <label class="tb-check"><input type="checkbox" data-testid="sel-cb-checked" checked> <span>Checked by default</span></label>
+            <label class="tb-check"><input type="checkbox" data-testid="sel-cb-indeterminate"> <span>Indeterminate (set from script)</span></label>
+            <label class="tb-check"><input type="checkbox" data-testid="sel-cb-disabled" disabled> <span>Disabled</span></label>
+            <label class="tb-check"><input type="checkbox" data-testid="sel-cb-required" required> <span>Required</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px">
+          <legend style="font-size:12px;color:var(--fg-faint)">Radio group — arrow keys must move the selection</legend>
+          <div class="tb-stack">
+            <label class="tb-check"><input type="radio" name="plan" value="free" data-testid="sel-radio-free" checked> <span>Free</span></label>
+            <label class="tb-check"><input type="radio" name="plan" value="pro" data-testid="sel-radio-pro"> <span>Pro</span></label>
+            <label class="tb-check"><input type="radio" name="plan" value="team" data-testid="sel-radio-team"> <span>Team</span></label>
+            <label class="tb-check"><input type="radio" name="plan" value="ent" data-testid="sel-radio-ent" disabled> <span>Enterprise (disabled)</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px">
+          <legend style="font-size:12px;color:var(--fg-faint)">Parent / child checkboxes</legend>
+          <label class="tb-check"><input type="checkbox" data-testid="sel-tree-parent"> <span><b>All notifications</b></span></label>
+          <div class="tb-stack" style="margin:8px 0 0 22px">
+            <label class="tb-check"><input type="checkbox" class="tree-child" data-testid="sel-tree-email"> <span>Email</span></label>
+            <label class="tb-check"><input type="checkbox" class="tree-child" data-testid="sel-tree-push"> <span>Push</span></label>
+            <label class="tb-check"><input type="checkbox" class="tree-child" data-testid="sel-tree-sms"> <span>SMS</span></label>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Switches <small>a styled native checkbox — keyboard and AT behaviour must survive the styling</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-row" style="gap:22px">
+        <label class="tb-switch"><input type="checkbox" data-testid="sel-switch-a" role="switch"><span class="tb-switch__track"></span><span>Dark reader</span></label>
+        <label class="tb-switch"><input type="checkbox" data-testid="sel-switch-b" role="switch" checked><span class="tb-switch__track"></span><span>Sync (on)</span></label>
+        <label class="tb-switch"><input type="checkbox" data-testid="sel-switch-c" role="switch" disabled><span class="tb-switch__track"></span><span>Beta (disabled)</span></label>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Select elements</h2>
+    <div class="tb-section__body">
+      <div class="tb-grid">
+        <div class="tb-field">
+          <label for="s-basic">Single select</label>
+          <select id="s-basic" data-testid="sel-select-single">
+            <option value="">— choose —</option>
+            <option value="chrome">Chromium</option>
+            <option value="gecko" selected>Gecko</option>
+            <option value="webkit">WebKit</option>
+            <option value="servo" disabled>Servo (disabled option)</option>
+          </select>
+        </div>
+        <div class="tb-field">
+          <label for="s-groups">With optgroups</label>
+          <select id="s-groups" data-testid="sel-select-groups">
+            <optgroup label="Desktop"><option>macOS</option><option>Windows</option><option>Linux</option></optgroup>
+            <optgroup label="Mobile"><option>iOS</option><option>Android</option></optgroup>
+            <optgroup label="Other" disabled><option>Fuchsia</option></optgroup>
+          </select>
+        </div>
+        <div class="tb-field">
+          <label for="s-multi">Multiple (size=5)</label>
+          <select id="s-multi" multiple size="5" data-testid="sel-select-multiple">
+            <option>Alpha</option><option selected>Bravo</option><option>Charlie</option>
+            <option selected>Delta</option><option>Echo</option><option>Foxtrot</option>
+          </select>
+        </div>
+        <div class="tb-field">
+          <label for="s-long">500 options <small style="color:var(--fg-faint)">popup scrolling &amp; type-ahead</small></label>
+          <select id="s-long" data-testid="sel-select-long"></select>
+        </div>
+        <div class="tb-field">
+          <label for="s-datalist">input + datalist</label>
+          <input id="s-datalist" list="cities" data-testid="sel-datalist" placeholder="Start typing a city">
+          <datalist id="cities">
+            <option value="Kyiv"></option><option value="Lviv"></option><option value="Odesa"></option>
+            <option value="Kharkiv"></option><option value="Dnipro"></option><option value="Vienna"></option>
+            <option value="Warsaw"></option><option value="Berlin"></option>
+          </datalist>
+        </div>
+        <div class="tb-field">
+          <label for="s-disabled">Disabled select</label>
+          <select id="s-disabled" data-testid="sel-select-disabled" disabled><option>Locked</option></select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Range, color, progress &amp; meter</h2>
+    <div class="tb-section__body">
+      <div class="tb-grid">
+        <div class="tb-field">
+          <label for="r-basic">range 0–100 <output data-testid="sel-range-out">50</output></label>
+          <input id="r-basic" type="range" min="0" max="100" value="50" data-testid="sel-range">
+        </div>
+        <div class="tb-field">
+          <label for="r-step">range with ticks (step 10)</label>
+          <input id="r-step" type="range" min="0" max="100" step="10" value="30" list="ticks" data-testid="sel-range-ticks">
+          <datalist id="ticks"><option value="0"></option><option value="25"></option><option value="50"></option><option value="75"></option><option value="100"></option></datalist>
+        </div>
+        <div class="tb-field">
+          <label>Dual-thumb range <output data-testid="sel-range-dual-out">20 – 80</output></label>
+          <div class="dual">
+            <input type="range" min="0" max="100" value="20" data-testid="sel-range-min" aria-label="Minimum">
+            <input type="range" min="0" max="100" value="80" data-testid="sel-range-max" aria-label="Maximum">
+          </div>
+        </div>
+        <div class="tb-field">
+          <label for="c-color">color</label>
+          <input id="c-color" type="color" value="#2f6df6" data-testid="sel-color" style="height:38px;padding:2px">
+        </div>
+        <div class="tb-field">
+          <label>progress (indeterminate + determinate)</label>
+          <div class="tb-row">
+            <progress data-testid="sel-progress-indeterminate" style="flex:1"></progress>
+            <progress data-testid="sel-progress" value="0.45" max="1" style="flex:1"></progress>
+          </div>
+        </div>
+        <div class="tb-field">
+          <label>meter (low / optimum / high)</label>
+          <div class="tb-row">
+            <meter data-testid="sel-meter-low" min="0" max="100" low="30" high="70" optimum="80" value="15" style="flex:1"></meter>
+            <meter data-testid="sel-meter-ok" min="0" max="100" low="30" high="70" optimum="80" value="85" style="flex:1"></meter>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Custom combobox <small>ARIA pattern, keyboard driven — no native popup involved</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-grid">
+        <div class="tb-field combo" id="combo">
+          <label for="combo-input">Filterable combobox</label>
+          <input id="combo-input" type="text" role="combobox" aria-expanded="false"
+                 aria-controls="combo-list" aria-autocomplete="list" autocomplete="off"
+                 data-testid="sel-combo-input" placeholder="Type to filter, ↑ ↓ Enter Esc">
+          <div class="combo__list" id="combo-list" role="listbox" data-testid="sel-combo-list" hidden></div>
+        </div>
+        <div class="tb-field">
+          <span class="tb-label">Multi-select chips</span>
+          <div class="tb-row" id="chips" data-testid="sel-chips" style="min-height:32px"></div>
+          <select data-testid="sel-chips-source" aria-label="Add a tag">
+            <option value="">+ add tag…</option>
+            <option>layout</option><option>network</option><option>storage</option>
+            <option>media</option><option>a11y</option><option>security</option>
+          </select>
+        </div>
+      </div>
+      <pre class="tb-out" data-testid="sel-out" style="margin-top:14px"></pre>
+    </div>
+  </section>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var q = function (id) { return document.querySelector('[data-testid="' + id + '"]'); };
+
+  q('sel-cb-indeterminate').indeterminate = true;
+
+  /* parent / child checkboxes */
+  var parent = q('sel-tree-parent');
+  var children = Array.prototype.slice.call(document.querySelectorAll('.tree-child'));
+  function syncParent() {
+    var n = children.filter(function (c) { return c.checked; }).length;
+    parent.checked = n === children.length;
+    parent.indeterminate = n > 0 && n < children.length;
+  }
+  parent.addEventListener('change', function () {
+    children.forEach(function (c) { c.checked = parent.checked; });
+    parent.indeterminate = false;
+  });
+  children.forEach(function (c) { c.addEventListener('change', syncParent); });
+
+  /* 500 options */
+  var long = q('sel-select-long');
+  for (var i = 1; i <= 500; i++) {
+    var o = document.createElement('option');
+    o.textContent = 'Option ' + String(i).padStart(3, '0');
+    long.appendChild(o);
+  }
+
+  /* range outputs */
+  var range = q('sel-range'), rOut = q('sel-range-out');
+  range.addEventListener('input', function () { rOut.textContent = range.value; });
+
+  var lo = q('sel-range-min'), hi = q('sel-range-max'), dOut = q('sel-range-dual-out');
+  function dual() {
+    if (+lo.value > +hi.value) { var t = lo.value; lo.value = hi.value; hi.value = t; }
+    dOut.textContent = lo.value + ' – ' + hi.value;
+  }
+  lo.addEventListener('input', dual); hi.addEventListener('input', dual);
+
+  /* indeterminate progress: remove value so it animates */
+  q('sel-progress-indeterminate').removeAttribute('value');
+
+  /* combobox */
+  var items = ['Blink', 'Gecko', 'WebKit', 'Servo', 'LibWeb', 'Flow', 'Goanna', 'NetSurf', 'KHTML', 'Trident'];
+  var input = q('sel-combo-input'), list = q('sel-combo-list'), active = -1, shown = [];
+  function render() {
+    var filter = input.value.toLowerCase();
+    shown = items.filter(function (x) { return x.toLowerCase().indexOf(filter) > -1; });
+    list.textContent = '';
+    shown.forEach(function (x, i) {
+      var d = document.createElement('div');
+      d.className = 'combo__opt';
+      d.id = 'combo-opt-' + i;
+      d.setAttribute('role', 'option');
+      d.setAttribute('data-testid', 'sel-combo-opt-' + x.toLowerCase());
+      d.setAttribute('aria-selected', String(i === active));
+      d.textContent = x;
+      d.addEventListener('mousedown', function (e) { e.preventDefault(); choose(x); });
+      list.appendChild(d);
+    });
+    list.hidden = !shown.length;
+    input.setAttribute('aria-expanded', String(!list.hidden));
+    input.setAttribute('aria-activedescendant', active > -1 ? 'combo-opt-' + active : '');
+  }
+  function choose(x) { input.value = x; active = -1; list.hidden = true; input.setAttribute('aria-expanded', 'false'); report(); }
+  input.addEventListener('input', function () { active = -1; render(); });
+  input.addEventListener('focus', render);
+  input.addEventListener('blur', function () { list.hidden = true; input.setAttribute('aria-expanded', 'false'); });
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown') { active = Math.min(active + 1, shown.length - 1); render(); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { active = Math.max(active - 1, 0); render(); e.preventDefault(); }
+    else if (e.key === 'Enter' && active > -1) { choose(shown[active]); e.preventDefault(); }
+    else if (e.key === 'Escape') { list.hidden = true; input.setAttribute('aria-expanded', 'false'); }
+  });
+
+  /* chips */
+  var chips = q('sel-chips'), source = q('sel-chips-source'), tags = [];
+  function drawChips() {
+    chips.textContent = '';
+    if (!tags.length) {
+      var e = document.createElement('span');
+      e.style.cssText = 'color:var(--fg-faint);font-size:13px';
+      e.textContent = 'No tags yet';
+      chips.appendChild(e);
+    }
+    tags.forEach(function (t) {
+      var c = document.createElement('span');
+      c.className = 'chip';
+      c.setAttribute('data-testid', 'sel-chip-' + t);
+      c.innerHTML = '<span></span><button type="button" aria-label="Remove ' + t + '">✕</button>';
+      c.querySelector('span').textContent = t;
+      c.querySelector('button').addEventListener('click', function () {
+        tags = tags.filter(function (x) { return x !== t; }); drawChips(); report();
+      });
+      chips.appendChild(c);
+    });
+  }
+  source.addEventListener('change', function () {
+    if (source.value && tags.indexOf(source.value) === -1) tags.push(source.value);
+    source.value = '';
+    drawChips(); report();
+  });
+  drawChips();
+
+  /* live report */
+  var out = q('sel-out');
+  function report() {
+    out.textContent = JSON.stringify({
+      combobox: input.value, chips: tags,
+      radio: (document.querySelector('input[name="plan"]:checked') || {}).value,
+      state: window.__testbed.state()
+    }, null, 2);
+  }
+  document.addEventListener('input', report);
+  document.addEventListener('change', report);
+  report();
+  document.documentElement.setAttribute('data-page-script', 'ok');
+});
+</script>
+</body>
+</html>

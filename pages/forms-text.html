@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Text input — Browser Testbed</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/testbed.css">
+<script src="../assets/js/nav-data.js" defer></script>
+<script src="../assets/js/testbed.js" defer></script>
+</head>
+<body data-page="forms-text">
+<main class="tb-main" id="main">
+
+  <section class="tb-section">
+    <h2>Input types <small>each one may get its own keyboard, UI affordance and validation</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-grid">
+        <div class="tb-field">
+          <label for="i-text">text</label>
+          <input id="i-text" type="text" data-testid="text-type-text" placeholder="Plain text">
+        </div>
+        <div class="tb-field">
+          <label for="i-password">password</label>
+          <input id="i-password" type="password" data-testid="text-type-password"
+                 autocomplete="current-password" placeholder="Masked">
+          <span class="tb-hint">Reveal button, password manager and caps-lock hints belong to the browser.</span>
+        </div>
+        <div class="tb-field">
+          <label for="i-email">email</label>
+          <input id="i-email" type="email" data-testid="text-type-email"
+                 autocomplete="email" placeholder="name@example.com">
+        </div>
+        <div class="tb-field">
+          <label for="i-url">url</label>
+          <input id="i-url" type="url" data-testid="text-type-url" placeholder="https://example.com">
+        </div>
+        <div class="tb-field">
+          <label for="i-tel">tel</label>
+          <input id="i-tel" type="tel" data-testid="text-type-tel" autocomplete="tel" placeholder="+380 44 000 0000">
+        </div>
+        <div class="tb-field">
+          <label for="i-search">search</label>
+          <input id="i-search" type="search" data-testid="text-type-search" placeholder="Search…">
+          <span class="tb-hint">Should show a clear (✕) affordance once it has a value.</span>
+        </div>
+        <div class="tb-field">
+          <label for="i-number">number</label>
+          <input id="i-number" type="number" data-testid="text-type-number" min="0" max="100" step="5" value="20">
+          <span class="tb-hint">Spinner buttons, arrow keys and wheel should all step by 5.</span>
+        </div>
+        <div class="tb-field">
+          <label for="i-number-dec">number, decimal step</label>
+          <input id="i-number-dec" type="number" data-testid="text-type-number-decimal"
+                 step="0.01" min="-10" max="10" value="1.25">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>State &amp; constraint attributes</h2>
+    <div class="tb-section__body">
+      <div class="tb-grid">
+        <div class="tb-field">
+          <label for="i-required">required</label>
+          <input id="i-required" type="text" data-testid="text-state-required" required placeholder="Must not be empty">
+        </div>
+        <div class="tb-field">
+          <label for="i-readonly">readonly</label>
+          <input id="i-readonly" type="text" data-testid="text-state-readonly" readonly value="Selectable, not editable">
+        </div>
+        <div class="tb-field">
+          <label for="i-disabled">disabled</label>
+          <input id="i-disabled" type="text" data-testid="text-state-disabled" disabled value="Not focusable">
+        </div>
+        <div class="tb-field">
+          <label for="i-maxlength">maxlength = 10</label>
+          <input id="i-maxlength" type="text" data-testid="text-state-maxlength" maxlength="10" placeholder="10 chars max">
+          <span class="tb-hint"><output data-testid="text-maxlength-count">0 / 10</output></span>
+        </div>
+        <div class="tb-field">
+          <label for="i-minlength">minlength = 5</label>
+          <input id="i-minlength" type="text" data-testid="text-state-minlength" minlength="5" placeholder="At least 5">
+        </div>
+        <div class="tb-field">
+          <label for="i-pattern">pattern = 3 letters + 3 digits</label>
+          <input id="i-pattern" type="text" data-testid="text-state-pattern"
+                 pattern="[A-Za-z]{3}[0-9]{3}" placeholder="abc123"
+                 title="Three letters followed by three digits">
+        </div>
+        <div class="tb-field">
+          <label for="i-prefilled">prefilled &amp; very long value</label>
+          <input id="i-prefilled" type="text" data-testid="text-state-long"
+                 value="This value is deliberately much longer than the field so horizontal scrolling, caret movement with Home/End, and text selection inside a single-line input can be checked.">
+        </div>
+        <div class="tb-field">
+          <label for="i-nospell">spellcheck=false, autocapitalize=none</label>
+          <input id="i-nospell" type="text" data-testid="text-state-nospell"
+                 spellcheck="false" autocapitalize="none" autocorrect="off" placeholder="teh mispeling stays">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>inputmode <small>drives which virtual keyboard appears on touch devices</small></h2>
+    <div class="tb-section__body">
+      <p class="tb-note">All of these are <code>type="text"</code>; only <code>inputmode</code> differs,
+         so any difference you see is the browser choosing a keyboard.</p>
+      <div class="tb-grid" id="inputmodes"></div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>autocomplete tokens <small>what a password manager or autofill engine reads</small></h2>
+    <div class="tb-section__body">
+      <form id="autofill-form" data-testid="text-autocomplete-form" autocomplete="on">
+        <div class="tb-grid" id="autocompletes"></div>
+      </form>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Multi-line &amp; rich editing</h2>
+    <div class="tb-section__body">
+      <div class="tb-stack">
+        <div class="tb-field">
+          <label for="i-textarea">textarea, fixed rows</label>
+          <textarea id="i-textarea" rows="4" data-testid="text-textarea"
+            placeholder="Resizable vertically. Try Enter, Tab, undo (Cmd/Ctrl+Z) and spellcheck."></textarea>
+        </div>
+        <div class="tb-field">
+          <label for="i-autogrow">textarea, auto-growing</label>
+          <textarea id="i-autogrow" rows="2" data-testid="text-textarea-autogrow"
+            placeholder="Grows as you type — height is recomputed on every input event."></textarea>
+        </div>
+        <div class="tb-field">
+          <span class="tb-label">contenteditable</span>
+          <div contenteditable="true" data-testid="text-contenteditable" role="textbox"
+               aria-multiline="true" aria-label="Rich text area"
+               style="min-height:90px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:9px">
+            <p>Editable rich text. Use the buttons below, or the browser's own shortcuts
+               (<kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>I</kbd>, <kbd>U</kbd>).</p>
+            <ul><li>List item with <b>bold</b> and <i>italic</i></li></ul>
+          </div>
+          <div class="tb-row" style="margin-top:8px">
+            <button class="tb-btn tb-btn--sm" type="button" data-cmd="bold" data-testid="text-rt-bold"><b>B</b></button>
+            <button class="tb-btn tb-btn--sm" type="button" data-cmd="italic" data-testid="text-rt-italic"><i>I</i></button>
+            <button class="tb-btn tb-btn--sm" type="button" data-cmd="underline" data-testid="text-rt-underline"><u>U</u></button>
+            <button class="tb-btn tb-btn--sm" type="button" data-cmd="insertUnorderedList" data-testid="text-rt-list">• List</button>
+            <button class="tb-btn tb-btn--sm" type="button" data-cmd="removeFormat" data-testid="text-rt-clear">Clear</button>
+          </div>
+        </div>
+        <div class="tb-field">
+          <span class="tb-label">contenteditable="plaintext-only"</span>
+          <div contenteditable="plaintext-only" data-testid="text-contenteditable-plain"
+               style="min-height:52px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:9px">Pasting rich text here should drop its formatting.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Composition &amp; selection <small>IME, caret and selection APIs</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-stack">
+        <div class="tb-field">
+          <label for="i-ime">IME / composition events</label>
+          <input id="i-ime" type="text" data-testid="text-ime" placeholder="Type with an IME (中文, 日本語, 한글)">
+          <span class="tb-hint">compositionstart / update / end are reported below and in the event log.</span>
+        </div>
+        <div class="tb-row">
+          <button class="tb-btn tb-btn--sm" type="button" data-testid="text-select-all">Select all in IME field</button>
+          <button class="tb-btn tb-btn--sm" type="button" data-testid="text-select-range">Select chars 2–5</button>
+          <button class="tb-btn tb-btn--sm" type="button" data-testid="text-caret-end">Caret to end</button>
+        </div>
+        <pre class="tb-out" data-testid="text-composition-out">No composition or selection events yet.</pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Enter-to-submit &amp; live value</h2>
+    <div class="tb-section__body">
+      <form data-testid="text-submit-form" style="margin-bottom:12px">
+        <div class="tb-row">
+          <input type="text" name="q" data-testid="text-submit-input" placeholder="Press Enter here" style="max-width:280px">
+          <button class="tb-btn tb-btn--primary" type="submit" data-testid="text-submit-button">Submit</button>
+        </div>
+      </form>
+      <pre class="tb-out" data-testid="text-live-out">Every value on this page appears here as you type.</pre>
+    </div>
+  </section>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  /* ---- generated inputmode fields ---- */
+  var modes = [
+    ['none', 'no virtual keyboard'], ['text', 'default'], ['decimal', 'digits + separator'],
+    ['numeric', 'digits only'], ['tel', 'phone pad'], ['search', 'Search action key'],
+    ['email', '@ and . keys'], ['url', '/ and .com keys']
+  ];
+  var mWrap = document.getElementById('inputmodes');
+  modes.forEach(function (m) {
+    var f = document.createElement('div');
+    f.className = 'tb-field';
+    f.innerHTML = '<label for="im-' + m[0] + '">inputmode="' + m[0] + '"</label>' +
+      '<input id="im-' + m[0] + '" type="text" inputmode="' + m[0] +
+      '" data-testid="text-inputmode-' + m[0] + '" placeholder="' + m[1] + '">';
+    mWrap.appendChild(f);
+  });
+
+  /* ---- generated autocomplete fields ---- */
+  var tokens = [
+    ['name', 'Full name', 'text'], ['given-name', 'Given name', 'text'],
+    ['family-name', 'Family name', 'text'], ['username', 'Username', 'text'],
+    ['new-password', 'New password', 'password'], ['one-time-code', 'One-time code', 'text'],
+    ['organization', 'Organization', 'text'], ['street-address', 'Street address', 'text'],
+    ['postal-code', 'Postal code', 'text'], ['country-name', 'Country', 'text'],
+    ['bday', 'Birthday', 'date'], ['sex', 'Sex', 'text']
+  ];
+  var aWrap = document.getElementById('autocompletes');
+  tokens.forEach(function (t) {
+    var f = document.createElement('div');
+    f.className = 'tb-field';
+    f.innerHTML = '<label for="ac-' + t[0] + '">' + t[1] + ' <code style="color:var(--fg-faint)">' + t[0] + '</code></label>' +
+      '<input id="ac-' + t[0] + '" type="' + t[2] + '" name="' + t[0] + '" autocomplete="' + t[0] +
+      '" data-testid="text-autocomplete-' + t[0] + '">';
+    aWrap.appendChild(f);
+  });
+
+  /* ---- maxlength counter ---- */
+  var ml = document.querySelector('[data-testid="text-state-maxlength"]');
+  var mlOut = document.querySelector('[data-testid="text-maxlength-count"]');
+  ml.addEventListener('input', function () { mlOut.textContent = ml.value.length + ' / 10'; });
+
+  /* ---- auto-growing textarea ---- */
+  var grow = document.querySelector('[data-testid="text-textarea-autogrow"]');
+  grow.addEventListener('input', function () {
+    grow.style.height = 'auto';
+    grow.style.height = grow.scrollHeight + 'px';
+  });
+
+  /* ---- rich text buttons ---- */
+  var rt = document.querySelector('[data-testid="text-contenteditable"]');
+  document.querySelectorAll('[data-cmd]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      rt.focus();
+      try { document.execCommand(btn.getAttribute('data-cmd'), false, null); }
+      catch (e) { alert('execCommand is not supported: ' + e.message); }
+    });
+  });
+
+  /* ---- composition + selection ---- */
+  var ime = document.querySelector('[data-testid="text-ime"]');
+  var cOut = document.querySelector('[data-testid="text-composition-out"]');
+  var lines = [];
+  function note(s) {
+    lines.unshift(new Date().toTimeString().slice(0, 8) + '  ' + s);
+    cOut.textContent = lines.slice(0, 12).join('\n');
+  }
+  ['compositionstart', 'compositionupdate', 'compositionend'].forEach(function (t) {
+    ime.addEventListener(t, function (e) { note(t + '  data=' + JSON.stringify(e.data || '')); });
+  });
+  ime.addEventListener('select', function () {
+    note('select  [' + ime.selectionStart + ', ' + ime.selectionEnd + ']');
+  });
+  document.querySelector('[data-testid="text-select-all"]').addEventListener('click', function () {
+    ime.focus(); ime.select(); note('select() called');
+  });
+  document.querySelector('[data-testid="text-select-range"]').addEventListener('click', function () {
+    ime.focus(); ime.setSelectionRange(1, 5); note('setSelectionRange(1, 5)');
+  });
+  document.querySelector('[data-testid="text-caret-end"]').addEventListener('click', function () {
+    ime.focus();
+    var n = ime.value.length;
+    ime.setSelectionRange(n, n);
+    note('caret moved to ' + n);
+  });
+
+  /* ---- submit demo ---- */
+  document.querySelector('[data-testid="text-submit-form"]').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = document.querySelector('[data-testid="text-submit-input"]').value;
+    note('submit  q=' + JSON.stringify(v));
+    alert('Form submitted with q = ' + JSON.stringify(v));
+  });
+
+  /* ---- live value dump ---- */
+  var out = document.querySelector('[data-testid="text-live-out"]');
+  function dump() {
+    var s = window.__testbed.state();
+    var filled = {};
+    Object.keys(s).forEach(function (k) {
+      if (s[k] !== '' && s[k] !== false && !(Array.isArray(s[k]) && !s[k].length)) filled[k] = s[k];
+    });
+    out.textContent = Object.keys(filled).length
+      ? JSON.stringify(filled, null, 2)
+      : 'Every value on this page appears here as you type.';
+  }
+  document.addEventListener('input', dump);
+  document.addEventListener('change', dump);
+  dump();
+  document.documentElement.setAttribute('data-page-script', 'ok');
+});
+</script>
+</body>
+</html>

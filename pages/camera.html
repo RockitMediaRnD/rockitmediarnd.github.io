@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Camera &amp; microphone — Browser Testbed</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/testbed.css">
+<script src="../assets/js/nav-data.js" defer></script>
+<script src="../assets/js/testbed.js" defer></script>
+<style>
+  .stage { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; }
+  .stage video, .stage canvas {
+    width:100%; aspect-ratio:16/9; background:#000; border-radius:var(--radius-sm);
+    border:1px solid var(--border); object-fit:cover;
+  }
+  .level { height:10px; border-radius:5px; background:var(--bg-sunken); overflow:hidden; }
+  .level span { display:block; height:100%; width:0%; background:var(--ok); }
+  .shots { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .shots img { height:80px; border-radius:var(--radius-sm); border:1px solid var(--border); }
+</style>
+</head>
+<body data-page="camera">
+<main class="tb-main" id="main">
+
+  <section class="tb-section">
+    <h2>Environment <small>capture needs a secure context and an explicit permission grant</small></h2>
+    <div class="tb-section__body">
+      <pre class="tb-out" data-testid="cam-env"></pre>
+      <div class="tb-row" style="margin-top:10px">
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="cam-permissions">Query Permissions API</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="cam-enumerate">enumerateDevices()</button>
+      </div>
+      <pre class="tb-out" data-testid="cam-devices" style="margin-top:10px">Device labels stay empty until permission has been granted at least once.</pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Capture through a file input <small>the mobile path — hands the OS camera app the job</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-grid">
+        <div class="tb-field">
+          <label for="cap-photo">Photo, rear camera</label>
+          <input id="cap-photo" type="file" accept="image/*" capture="environment" data-testid="cam-capture-photo">
+        </div>
+        <div class="tb-field">
+          <label for="cap-selfie">Photo, front camera</label>
+          <input id="cap-selfie" type="file" accept="image/*" capture="user" data-testid="cam-capture-selfie">
+        </div>
+        <div class="tb-field">
+          <label for="cap-video">Video</label>
+          <input id="cap-video" type="file" accept="video/*" capture data-testid="cam-capture-video">
+        </div>
+        <div class="tb-field">
+          <label for="cap-audio">Audio</label>
+          <input id="cap-audio" type="file" accept="audio/*" capture data-testid="cam-capture-audio">
+        </div>
+        <div class="tb-field">
+          <label for="cap-any">Gallery or camera (no capture hint)</label>
+          <input id="cap-any" type="file" accept="image/*" data-testid="cam-capture-any">
+        </div>
+      </div>
+      <div class="shots" data-testid="cam-capture-previews"></div>
+      <pre class="tb-out" data-testid="cam-capture-out" style="margin-top:10px">Nothing captured yet.</pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>getUserMedia <small>live camera and microphone</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-row" style="margin-bottom:12px">
+        <button class="tb-btn tb-btn--primary" type="button" data-testid="cam-start">Start camera + mic</button>
+        <button class="tb-btn" type="button" data-testid="cam-start-video-only">Camera only</button>
+        <button class="tb-btn" type="button" data-testid="cam-start-audio-only">Microphone only</button>
+        <button class="tb-btn" type="button" data-testid="cam-switch">Switch camera</button>
+        <button class="tb-btn tb-btn--danger" type="button" data-testid="cam-stop">Stop</button>
+      </div>
+      <div class="tb-row" style="margin-bottom:12px">
+        <label class="tb-check"><input type="checkbox" data-testid="cam-constraint-hd" checked> <span>Request 1280×720</span></label>
+        <label class="tb-check"><input type="checkbox" data-testid="cam-constraint-mirror" checked> <span>Mirror preview</span></label>
+        <select data-testid="cam-device-select" aria-label="Video input device" style="max-width:260px">
+          <option value="">Default video input</option>
+        </select>
+      </div>
+      <div class="stage">
+        <div>
+          <video data-testid="cam-preview" playsinline autoplay muted></video>
+          <p class="tb-hint">Live preview (muted so autoplay policies do not block it)</p>
+        </div>
+        <div>
+          <canvas data-testid="cam-canvas" width="640" height="360"></canvas>
+          <p class="tb-hint">Snapshot canvas</p>
+        </div>
+      </div>
+      <div class="tb-row" style="margin-top:12px">
+        <button class="tb-btn" type="button" data-testid="cam-snapshot">Take snapshot</button>
+        <button class="tb-btn" type="button" data-testid="cam-snapshot-download">Snapshot → download</button>
+        <button class="tb-btn" type="button" data-testid="cam-track-settings">Dump track settings</button>
+      </div>
+      <div class="shots" data-testid="cam-shots"></div>
+      <div style="margin-top:14px">
+        <div class="tb-label" style="margin-bottom:5px">Microphone level</div>
+        <div class="level"><span data-testid="cam-level"></span></div>
+      </div>
+      <pre class="tb-out" data-testid="cam-out" style="margin-top:12px">Idle.</pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Screen capture &amp; recording</h2>
+    <div class="tb-section__body">
+      <div class="tb-row" style="margin-bottom:12px">
+        <button class="tb-btn" type="button" data-testid="cam-screen">getDisplayMedia()</button>
+        <button class="tb-btn" type="button" data-testid="cam-record-start">Record current stream</button>
+        <button class="tb-btn" type="button" data-testid="cam-record-stop">Stop recording</button>
+        <button class="tb-btn" type="button" data-testid="cam-record-download">Download recording</button>
+      </div>
+      <div class="stage">
+        <div>
+          <video data-testid="cam-screen-preview" playsinline autoplay muted></video>
+          <p class="tb-hint">Screen / window / tab share</p>
+        </div>
+        <div>
+          <video data-testid="cam-playback" controls playsinline></video>
+          <p class="tb-hint">Recorded clip playback</p>
+        </div>
+      </div>
+      <pre class="tb-out" data-testid="cam-record-out" style="margin-top:12px">No recording yet.</pre>
+    </div>
+  </section>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var q = function (id) { return document.querySelector('[data-testid="' + id + '"]'); };
+  var out = q('cam-out');
+  var stream = null, screenStream = null, recorder = null, chunks = [], recordedUrl = null;
+  var facing = 'user', audioCtx = null, rafId = 0;
+
+  function say(msg) { out.textContent = new Date().toTimeString().slice(0, 8) + '  ' + msg; }
+
+  /* ---------- environment ---------- */
+  q('cam-env').textContent = JSON.stringify({
+    secureContext: window.isSecureContext,
+    origin: location.origin,
+    mediaDevices: !!navigator.mediaDevices,
+    getUserMedia: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
+    getDisplayMedia: !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia),
+    MediaRecorder: typeof window.MediaRecorder === 'function',
+    ImageCapture: typeof window.ImageCapture === 'function',
+    permissionsAPI: !!navigator.permissions
+  }, null, 2);
+
+  q('cam-permissions').addEventListener('click', function () {
+    if (!navigator.permissions) { q('cam-devices').textContent = 'Permissions API not supported.'; return; }
+    Promise.all(['camera', 'microphone'].map(function (name) {
+      return navigator.permissions.query({ name: name })
+        .then(function (s) { return name + ': ' + s.state; })
+        .catch(function (e) { return name + ': query failed (' + e.name + ')'; });
+    })).then(function (lines) { q('cam-devices').textContent = lines.join('\n'); });
+  });
+
+  function listDevices() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+      q('cam-devices').textContent = 'enumerateDevices() not supported.';
+      return Promise.resolve([]);
+    }
+    return navigator.mediaDevices.enumerateDevices().then(function (devs) {
+      q('cam-devices').textContent = devs.map(function (d) {
+        return d.kind + '  ' + (d.label || '(label hidden until permission is granted)') +
+               '  id=' + (d.deviceId ? d.deviceId.slice(0, 12) + '…' : '');
+      }).join('\n') || 'No devices reported.';
+      var sel = q('cam-device-select');
+      var current = sel.value;
+      sel.textContent = '';
+      sel.appendChild(new Option('Default video input', ''));
+      devs.filter(function (d) { return d.kind === 'videoinput'; }).forEach(function (d, i) {
+        sel.appendChild(new Option(d.label || ('Camera ' + (i + 1)), d.deviceId));
+      });
+      sel.value = current;
+      return devs;
+    });
+  }
+  q('cam-enumerate').addEventListener('click', listDevices);
+  if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
+    navigator.mediaDevices.addEventListener('devicechange', function () {
+      say('devicechange fired'); listDevices();
+    });
+  }
+
+  /* ---------- capture through file inputs ---------- */
+  ['cam-capture-photo', 'cam-capture-selfie', 'cam-capture-video', 'cam-capture-audio', 'cam-capture-any']
+    .forEach(function (id) {
+      q(id).addEventListener('change', function (e) {
+        var f = e.target.files[0];
+        if (!f) return;
+        q('cam-capture-out').textContent = JSON.stringify({
+          source: id, name: f.name, type: f.type, size: f.size,
+          lastModified: new Date(f.lastModified).toISOString()
+        }, null, 2);
+        if (/^image\//.test(f.type)) {
+          var img = document.createElement('img');
+          img.src = URL.createObjectURL(f);
+          img.alt = 'Captured image';
+          img.setAttribute('data-testid', 'cam-capture-preview');
+          q('cam-capture-previews').appendChild(img);
+        }
+      });
+    });
+
+  /* ---------- getUserMedia ---------- */
+  function stopStream() {
+    if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; }
+    q('cam-preview').srcObject = null;
+    if (rafId) cancelAnimationFrame(rafId);
+    if (audioCtx) { audioCtx.close(); audioCtx = null; }
+    q('cam-level').style.width = '0%';
+  }
+
+  function start(constraints) {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      say('getUserMedia is not available (needs a secure context).');
+      return;
+    }
+    stopStream();
+    say('requesting ' + JSON.stringify(constraints) + ' …');
+    navigator.mediaDevices.getUserMedia(constraints).then(function (s) {
+      stream = s;
+      var v = q('cam-preview');
+      v.srcObject = s;
+      v.style.transform = q('cam-constraint-mirror').checked ? 'scaleX(-1)' : 'none';
+      say('stream started: ' + s.getTracks().map(function (t) {
+        return t.kind + '(' + t.label + ')'; }).join(', '));
+      listDevices();
+      if (s.getAudioTracks().length) meter(s);
+      s.getTracks().forEach(function (t) {
+        t.addEventListener('ended', function () { say('track ended: ' + t.kind); });
+      });
+    }).catch(function (e) {
+      say('getUserMedia failed — ' + e.name + ': ' + e.message);
+    });
+  }
+
+  function videoConstraint() {
+    var c = {};
+    var dev = q('cam-device-select').value;
+    if (dev) c.deviceId = { exact: dev };
+    else c.facingMode = facing;
+    if (q('cam-constraint-hd').checked) { c.width = { ideal: 1280 }; c.height = { ideal: 720 }; }
+    return c;
+  }
+
+  q('cam-start').addEventListener('click', function () { start({ video: videoConstraint(), audio: true }); });
+  q('cam-start-video-only').addEventListener('click', function () { start({ video: videoConstraint() }); });
+  q('cam-start-audio-only').addEventListener('click', function () { start({ audio: true }); });
+  q('cam-switch').addEventListener('click', function () {
+    facing = facing === 'user' ? 'environment' : 'user';
+    q('cam-device-select').value = '';
+    say('switching to facingMode=' + facing);
+    start({ video: videoConstraint(), audio: !!(stream && stream.getAudioTracks().length) });
+  });
+  q('cam-stop').addEventListener('click', function () { stopStream(); say('stopped, all tracks released'); });
+  q('cam-constraint-mirror').addEventListener('change', function () {
+    q('cam-preview').style.transform = this.checked ? 'scaleX(-1)' : 'none';
+  });
+
+  function meter(s) {
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AC();
+      var src = audioCtx.createMediaStreamSource(s);
+      var analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 512;
+      src.connect(analyser);
+      var data = new Uint8Array(analyser.frequencyBinCount);
+      (function loop() {
+        analyser.getByteTimeDomainData(data);
+        var peak = 0;
+        for (var i = 0; i < data.length; i++) peak = Math.max(peak, Math.abs(data[i] - 128));
+        q('cam-level').style.width = Math.min(100, peak / 128 * 200).toFixed(0) + '%';
+        rafId = requestAnimationFrame(loop);
+      })();
+    } catch (e) { say('audio meter unavailable: ' + e.message); }
+  }
+
+  function snapshot() {
+    var v = q('cam-preview'), c = q('cam-canvas');
+    if (!v.videoWidth) { say('no video frame available — start the camera first'); return null; }
+    c.width = v.videoWidth; c.height = v.videoHeight;
+    c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+    return c;
+  }
+  q('cam-snapshot').addEventListener('click', function () {
+    var c = snapshot();
+    if (!c) return;
+    var img = document.createElement('img');
+    img.src = c.toDataURL('image/png');
+    img.alt = 'Snapshot';
+    img.setAttribute('data-testid', 'cam-shot');
+    q('cam-shots').appendChild(img);
+    say('snapshot taken at ' + c.width + '×' + c.height);
+  });
+  q('cam-snapshot-download').addEventListener('click', function () {
+    var c = snapshot();
+    if (!c) return;
+    c.toBlob(function (b) {
+      var url = URL.createObjectURL(b);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'snapshot.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 3000);
+    }, 'image/png');
+  });
+  q('cam-track-settings').addEventListener('click', function () {
+    if (!stream) { say('no active stream'); return; }
+    out.textContent = JSON.stringify(stream.getTracks().map(function (t) {
+      return {
+        kind: t.kind, label: t.label, readyState: t.readyState,
+        settings: t.getSettings ? t.getSettings() : 'getSettings() unsupported',
+        capabilities: t.getCapabilities ? t.getCapabilities() : 'getCapabilities() unsupported'
+      };
+    }), null, 2);
+  });
+
+  /* ---------- screen capture & recording ---------- */
+  q('cam-screen').addEventListener('click', function () {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+      q('cam-record-out').textContent = 'getDisplayMedia() is not supported here.';
+      return;
+    }
+    navigator.mediaDevices.getDisplayMedia({ video: true, audio: false }).then(function (s) {
+      if (screenStream) screenStream.getTracks().forEach(function (t) { t.stop(); });
+      screenStream = s;
+      q('cam-screen-preview').srcObject = s;
+      q('cam-record-out').textContent = 'Sharing: ' + s.getVideoTracks()[0].label;
+      s.getVideoTracks()[0].addEventListener('ended', function () {
+        q('cam-record-out').textContent = 'Screen share ended by the user.';
+      });
+    }).catch(function (e) {
+      q('cam-record-out').textContent = 'getDisplayMedia failed — ' + e.name + ': ' + e.message;
+    });
+  });
+
+  q('cam-record-start').addEventListener('click', function () {
+    var s = stream || screenStream;
+    if (!s) { q('cam-record-out').textContent = 'Start the camera or a screen share first.'; return; }
+    if (typeof MediaRecorder !== 'function') { q('cam-record-out').textContent = 'MediaRecorder is not supported.'; return; }
+    var mime = ['video/webm;codecs=vp9', 'video/webm', 'video/mp4'].filter(function (m) {
+      return MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m);
+    })[0];
+    chunks = [];
+    try { recorder = new MediaRecorder(s, mime ? { mimeType: mime } : undefined); }
+    catch (e) { q('cam-record-out').textContent = 'MediaRecorder rejected the stream: ' + e.message; return; }
+    recorder.ondataavailable = function (e) { if (e.data.size) chunks.push(e.data); };
+    recorder.onstop = function () {
+      var blob = new Blob(chunks, { type: recorder.mimeType });
+      if (recordedUrl) URL.revokeObjectURL(recordedUrl);
+      recordedUrl = URL.createObjectURL(blob);
+      q('cam-playback').src = recordedUrl;
+      q('cam-record-out').textContent = 'Recorded ' + (blob.size / 1024).toFixed(1) + ' KB as ' + recorder.mimeType;
+    };
+    recorder.start(250);
+    q('cam-record-out').textContent = 'Recording as ' + (mime || 'the default type') + '…';
+  });
+  q('cam-record-stop').addEventListener('click', function () {
+    if (recorder && recorder.state !== 'inactive') recorder.stop();
+    else q('cam-record-out').textContent = 'Not recording.';
+  });
+  q('cam-record-download').addEventListener('click', function () {
+    if (!recordedUrl) { q('cam-record-out').textContent = 'Record something first.'; return; }
+    var a = document.createElement('a');
+    a.href = recordedUrl;
+    a.download = 'recording' + (/mp4/.test(recorder.mimeType) ? '.mp4' : '.webm');
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  /* release hardware when leaving the page */
+  window.addEventListener('pagehide', function () {
+    stopStream();
+    if (screenStream) screenStream.getTracks().forEach(function (t) { t.stop(); });
+  });
+
+  listDevices();
+  document.documentElement.setAttribute('data-page-script', 'ok');
+});
+</script>
+</body>
+</html>

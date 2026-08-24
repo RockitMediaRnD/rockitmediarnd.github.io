@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Typography &amp; i18n — Browser Testbed</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/testbed.css">
+<script src="../assets/js/nav-data.js" defer></script>
+<script src="../assets/js/testbed.js" defer></script>
+<style>
+  .sample { padding:12px 14px; border:1px solid var(--border); border-radius:var(--radius-sm);
+            background:var(--bg-elev); margin-bottom:10px; }
+  .sample small { display:block; font-size:11px; color:var(--fg-faint); text-transform:uppercase;
+                  letter-spacing:.06em; margin-bottom:5px; }
+  .clamp { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .ellipsis { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+  .cols { column-count:3; column-gap:22px; column-rule:1px solid var(--border); }
+  @media (max-width:700px) { .cols { column-count:1; } }
+  .vertical { writing-mode:vertical-rl; height:190px; border:1px solid var(--border);
+              border-radius:var(--radius-sm); padding:10px; }
+  .stroke { font-size:34px; font-weight:800; -webkit-text-stroke:1px var(--accent); color:transparent; }
+  .shadowtext { font-size:30px; font-weight:700; text-shadow:2px 2px 0 var(--accent), 4px 4px 0 var(--border); }
+</style>
+</head>
+<body data-page="text">
+<main class="tb-main" id="main">
+
+  <section class="tb-section">
+    <h2>Type scale &amp; elements <small>headings, inline elements, quotes, code</small></h2>
+    <div class="tb-section__body">
+      <h1 style="margin:0 0 6px" data-testid="text-h1">Heading level 1</h1>
+      <h2 style="margin:0 0 6px;border:0;padding:0;background:none" data-testid="text-h2">Heading level 2</h2>
+      <h3 style="margin:0 0 6px" data-testid="text-h3">Heading level 3</h3>
+      <p data-testid="text-paragraph">A paragraph with <b>bold</b>, <i>italic</i>, <u>underline</u>,
+        <s>strikethrough</s>, <mark>a highlight</mark>, <small>small print</small>,
+        H<sub>2</sub>O and E=mc<sup>2</sup>, <code>inline code</code>, <kbd>Ctrl</kbd>+<kbd>C</kbd>,
+        an <a href="#">inline link</a> and an <abbr title="abbreviation">abbr</abbr>.</p>
+      <blockquote style="margin:0 0 12px;padding:8px 14px;border-left:3px solid var(--accent);color:var(--fg-muted)"
+                  data-testid="text-quote">A block quotation, with a <cite>citation</cite>.</blockquote>
+      <pre data-testid="text-pre">function example(a, b) {
+  // preformatted text keeps its whitespace
+  return a &lt;= b ? a : b;
+}</pre>
+      <ul data-testid="text-list"><li>Unordered item</li><li>Another, with a nested list
+        <ol><li>Ordered child</li><li>Second child</li></ol></li></ul>
+      <dl data-testid="text-dl" style="margin:0">
+        <dt style="font-weight:600">Definition term</dt>
+        <dd style="margin:0 0 8px 18px;color:var(--fg-muted)">Its description.</dd>
+      </dl>
+      <hr style="border:0;border-top:1px solid var(--border);margin:14px 0">
+      <p class="stroke" data-testid="text-stroke">Text stroke</p>
+      <p class="shadowtext" data-testid="text-shadow">Text shadow</p>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Scripts &amp; directionality</h2>
+    <div class="tb-section__body">
+      <div class="sample" lang="uk" data-testid="text-cyrillic"><small>Ukrainian (Cyrillic)</small>
+        Це тестовий рядок українською: їжак, ґанок, з’їзд, «лапки», тире — та апостроф.</div>
+      <div class="sample" lang="el" data-testid="text-greek"><small>Greek</small>
+        Το γρήγορο καφέ αλεπού πηδάει πάνω από το τεμπέλικο σκυλί.</div>
+      <div class="sample" lang="ja" data-testid="text-japanese"><small>Japanese</small>
+        日本語のテキストです。漢字、ひらがな、カタカナが混在しています。行の折り返しに注意。</div>
+      <div class="sample" lang="zh" data-testid="text-chinese"><small>Chinese</small>
+        中文文本示例，用于检查断行、字间距和字体回退行为。</div>
+      <div class="sample" lang="ko" data-testid="text-korean"><small>Korean</small>
+        한국어 텍스트 예시입니다. 자간과 줄바꿈을 확인하세요.</div>
+      <div class="sample" lang="ar" dir="rtl" data-testid="text-arabic"><small>Arabic, dir=rtl</small>
+        هذا نص تجريبي بالعربية لاختبار الاتجاه من اليمين إلى اليسار وربط الحروف.</div>
+      <div class="sample" lang="he" dir="rtl" data-testid="text-hebrew"><small>Hebrew, dir=rtl</small>
+        זהו טקסט לדוגמה בעברית לבדיקת כיווניות מימין לשמאל.</div>
+      <div class="sample" data-testid="text-bidi"><small>Mixed bidi in one line</small>
+        The invoice number is <span dir="rtl">رقم ١٢٣٤٥</span> and the total is 42 €.
+        Without <code>dir</code> hints this is where reordering bugs show up: مرحبا 123 hello.</div>
+      <div class="sample" data-testid="text-emoji"><small>Emoji, ZWJ sequences, skin tones, flags</small>
+        <span style="font-size:26px">😀 🎯 👩‍💻 👨‍👩‍👧‍👦 🧑🏽‍🚀 🏳️‍🌈 🇺🇦 🇯🇵 ❤️ 1️⃣ 👍🏿</span></div>
+      <div class="sample" data-testid="text-combining"><small>Combining marks &amp; normalisation</small>
+        Precomposed “é” vs combining “é” — <span data-testid="text-normalize-out"></span></div>
+      <div class="sample vertical" lang="ja" data-testid="text-vertical"><small>writing-mode: vertical-rl</small>
+        縦書きのテキストです。</div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Overflow, wrapping and truncation</h2>
+    <div class="tb-section__body">
+      <div class="sample" data-testid="text-longword"><small>Unbreakable word</small>
+        <span style="overflow-wrap:anywhere">Pneumonoultramicroscopicsilicovolcanoconiosis_und_Donaudampfschiffahrtselektrizitätenhauptbetriebswerkbauunterbeamtengesellschaft</span></div>
+      <div class="sample" data-testid="text-url-overflow"><small>Long URL, no wrapping rules</small>
+        https://example.com/a/very/long/path/that/keeps/going/and/going?with=query&amp;parameters=that&amp;never=end#and-a-fragment</div>
+      <div class="sample ellipsis" data-testid="text-ellipsis"><small>text-overflow: ellipsis</small>
+        This single line is much too long for its container and should be cut off with an ellipsis rather than wrapping onto a second line.</div>
+      <div class="sample clamp" data-testid="text-clamp"><small>line-clamp: 3</small>
+        Multi-line clamping keeps three lines and hides the rest. Lorem ipsum dolor sit amet, consectetur
+        adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+        veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+        irure dolor in reprehenderit in voluptate velit esse cillum dolore.</div>
+      <div class="sample" data-testid="text-hyphens" style="hyphens:auto;width:220px" lang="en"><small>hyphens: auto</small>
+        Extraordinarily complicated hyphenation demonstrates language-aware line breaking.</div>
+      <div class="sample cols" data-testid="text-columns"><small>CSS multi-column</small>
+        Columns split this text into three balanced tracks. Lorem ipsum dolor sit amet, consectetur adipiscing
+        elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam, quis
+        nostrud exercitation ullamco laboris nisi ut aliquip.</div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Fonts &amp; features</h2>
+    <div class="tb-section__body">
+      <div class="tb-grid">
+        <div class="sample" style="font-family:system-ui" data-testid="text-font-system"><small>system-ui</small>The quick brown fox 0123</div>
+        <div class="sample" style="font-family:Georgia,'Times New Roman',serif" data-testid="text-font-serif"><small>serif</small>The quick brown fox 0123</div>
+        <div class="sample" style="font-family:ui-monospace,Menlo,monospace" data-testid="text-font-mono"><small>monospace</small>The quick brown fox 0123 lI1 O0</div>
+        <div class="sample" style="font-family:'A Font That Does Not Exist',cursive" data-testid="text-font-fallback"><small>missing family → fallback</small>The quick brown fox 0123</div>
+        <div class="sample" style="font-variant-numeric:tabular-nums" data-testid="text-tabular"><small>tabular-nums</small>
+          <div>1111.11</div><div>8888.88</div></div>
+        <div class="sample" style="font-feature-settings:'liga' 1,'dlig' 1" data-testid="text-ligatures"><small>ligatures</small>
+          fi fl ffi — office, waffle</div>
+        <div class="sample" data-testid="text-fontsize"><small>Relative sizes</small>
+          <span style="font-size:.75rem">0.75rem</span> ·
+          <span style="font-size:1rem">1rem</span> ·
+          <span style="font-size:1.5rem">1.5rem</span> ·
+          <span style="font-size:2vw">2vw</span> ·
+          <span style="font-size:clamp(12px,2.5vw,26px)">clamp()</span></div>
+        <div class="sample" data-testid="text-fontloading"><small>document.fonts</small>
+          <span data-testid="text-fonts-status">checking…</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Intl formatting <small>numbers, dates, plurals, lists, relative time, collation</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-row" style="margin-bottom:12px">
+        <select data-testid="text-intl-locale" aria-label="Locale">
+          <option>uk-UA</option><option>en-US</option><option>de-DE</option>
+          <option>ja-JP</option><option>ar-EG</option><option>hi-IN</option>
+        </select>
+      </div>
+      <pre class="tb-out" data-testid="text-intl-out"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Print &amp; zoom</h2>
+    <div class="tb-section__body">
+      <p class="tb-note">The stylesheet hides the header, sidebar and event log in <code>@media print</code>.
+         Use the button below (or the browser's own print preview) to check pagination.</p>
+      <div class="tb-row">
+        <button class="tb-btn" type="button" data-testid="text-print">window.print()</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="text-zoom-report">Report zoom &amp; text metrics</button>
+      </div>
+      <pre class="tb-out" data-testid="text-zoom-out" style="margin-top:10px"></pre>
+    </div>
+  </section>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var q = function (id) { return document.querySelector('[data-testid="' + id + '"]'); };
+
+  var pre = 'caf\u00e9';    // precomposed U+00E9
+  var comb = 'cafe\u0301';  // e followed by combining acute
+  q('text-normalize-out').textContent =
+    JSON.stringify(pre) + ' (len ' + pre.length + ') vs ' + JSON.stringify(comb) + ' (len ' + comb.length + ') — ' +
+    'equal: ' + (pre === comb) + ', after NFC: ' + (pre.normalize('NFC') === comb.normalize('NFC'));
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () {
+      q('text-fonts-status').textContent = document.fonts.size + ' font face(s) registered; status=' + document.fonts.status;
+    });
+  } else {
+    q('text-fonts-status').textContent = 'document.fonts is not supported.';
+  }
+
+  function intl() {
+    var loc = q('text-intl-locale').value;
+    var d = new Date('2026-08-24T14:30:00Z');
+    var out;
+    try {
+      out = {
+        locale: loc,
+        number: new Intl.NumberFormat(loc).format(1234567.891),
+        currency: new Intl.NumberFormat(loc, { style: 'currency', currency: 'UAH' }).format(1234.5),
+        percent: new Intl.NumberFormat(loc, { style: 'percent' }).format(0.8734),
+        compact: new Intl.NumberFormat(loc, { notation: 'compact' }).format(9876543),
+        date: new Intl.DateTimeFormat(loc, { dateStyle: 'full', timeStyle: 'short' }).format(d),
+        relative: new Intl.RelativeTimeFormat(loc, { numeric: 'auto' }).format(-3, 'day'),
+        list: new Intl.ListFormat(loc, { type: 'conjunction' }).format(['алфа', 'бета', 'гама']),
+        plural: [0, 1, 2, 5, 21].map(function (n) {
+          return n + '→' + new Intl.PluralRules(loc).select(n);
+        }).join('  '),
+        collation: ['ä', 'a', 'z', 'ö', 'b', 'я', 'і'].sort(new Intl.Collator(loc).compare).join(' '),
+        segments: (typeof Intl.Segmenter === 'function')
+          ? Array.from(new Intl.Segmenter(loc, { granularity: 'word' })
+              .segment('Привіт світ, hello world!')).filter(function (s) { return s.isWordLike; })
+              .map(function (s) { return s.segment; }).join(' | ')
+          : 'Intl.Segmenter not supported'
+      };
+    } catch (e) {
+      out = { error: e.name + ': ' + e.message };
+    }
+    q('text-intl-out').textContent = JSON.stringify(out, null, 2);
+  }
+  q('text-intl-locale').addEventListener('change', intl);
+  intl();
+
+  q('text-print').addEventListener('click', function () { window.print(); });
+  function zoomReport() {
+    var probe = q('text-paragraph');
+    var cs = getComputedStyle(probe);
+    q('text-zoom-out').textContent = JSON.stringify({
+      devicePixelRatio: window.devicePixelRatio,
+      innerWidth: window.innerWidth,
+      outerWidth: window.outerWidth,
+      visualViewport: window.visualViewport
+        ? { width: Math.round(window.visualViewport.width), scale: window.visualViewport.scale }
+        : 'unsupported',
+      rootFontSize: getComputedStyle(document.documentElement).fontSize,
+      paragraphFontSize: cs.fontSize,
+      lineHeight: cs.lineHeight,
+      measuredWidth: Math.round(probe.getBoundingClientRect().width)
+    }, null, 2);
+  }
+  q('text-zoom-report').addEventListener('click', zoomReport);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', zoomReport);
+  zoomReport();
+  document.documentElement.setAttribute('data-page-script', 'ok');
+});
+</script>
+</body>
+</html>

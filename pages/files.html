@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Files &amp; drag-drop — Browser Testbed</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/testbed.css">
+<script src="../assets/js/nav-data.js" defer></script>
+<script src="../assets/js/testbed.js" defer></script>
+<style>
+  .drop { border:2px dashed var(--border-strong); border-radius:var(--radius); padding:26px;
+          text-align:center; color:var(--fg-muted); background:var(--bg-sunken); transition:.15s; }
+  .drop[data-over="true"] { border-color:var(--accent); background:var(--accent-soft); color:var(--accent); }
+  .previews { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+  .previews figure { margin:0; width:120px; }
+  .previews img { width:120px; height:90px; object-fit:cover; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--bg-sunken); }
+  .previews figcaption { font-size:11px; color:var(--fg-faint); word-break:break-all; }
+  .bar { height:8px; border-radius:4px; background:var(--bg-sunken); overflow:hidden; }
+  .bar span { display:block; height:100%; width:0; background:var(--accent); transition:width .12s linear; }
+</style>
+</head>
+<body data-page="files">
+<main class="tb-main" id="main">
+
+  <section class="tb-section">
+    <h2>File inputs <small>each variant opens a different native picker configuration</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-grid">
+        <div class="tb-field">
+          <label for="f-single">Single file</label>
+          <input id="f-single" type="file" data-testid="files-single">
+        </div>
+        <div class="tb-field">
+          <label for="f-multi">Multiple files</label>
+          <input id="f-multi" type="file" multiple data-testid="files-multiple">
+        </div>
+        <div class="tb-field">
+          <label for="f-images">accept="image/*"</label>
+          <input id="f-images" type="file" accept="image/*" multiple data-testid="files-images">
+        </div>
+        <div class="tb-field">
+          <label for="f-ext">accept=".pdf,.csv,.json"</label>
+          <input id="f-ext" type="file" accept=".pdf,.csv,.json,application/pdf,text/csv,application/json" data-testid="files-extensions">
+        </div>
+        <div class="tb-field">
+          <label for="f-dir">Whole directory (webkitdirectory)</label>
+          <input id="f-dir" type="file" webkitdirectory data-testid="files-directory">
+          <span class="tb-hint">Non-standard but universally implemented; should warn before uploading a folder.</span>
+        </div>
+        <div class="tb-field">
+          <label for="f-disabled">Disabled</label>
+          <input id="f-disabled" type="file" disabled data-testid="files-disabled">
+        </div>
+        <div class="tb-field">
+          <span class="tb-label">Styled trigger (hidden input)</span>
+          <button class="tb-btn" type="button" data-testid="files-custom-trigger">Choose a file…</button>
+          <input type="file" data-testid="files-custom-input" class="tb-sr-only" tabindex="-1" aria-hidden="true">
+        </div>
+        <div class="tb-field">
+          <span class="tb-label">Clear the pickers</span>
+          <button class="tb-btn tb-btn--sm" type="button" data-testid="files-clear">Reset every file input</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Drop zone <small>files, folders, and content dragged out of other pages</small></h2>
+    <div class="tb-section__body">
+      <div class="drop" data-testid="files-dropzone" tabindex="0" role="button"
+           aria-label="Drop files here or press Enter to browse">
+        <b>Drop files or folders here</b><br>
+        <span style="font-size:13px">…or paste with <kbd>Cmd/Ctrl</kbd>+<kbd>V</kbd>, or press Enter to open the picker.</span>
+      </div>
+      <p class="tb-note" style="margin-top:10px">Dragged items are read through <code>DataTransfer</code>:
+         both <code>files</code> and <code>items</code> (which also carries text, URLs and directory entries).</p>
+      <pre class="tb-out" data-testid="files-drop-out">Nothing dropped yet.</pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Selected files</h2>
+    <div class="tb-section__body">
+      <div class="tb-table-wrap">
+        <table class="tb-table" data-testid="files-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Size</th><th>Last modified</th><th>Read</th></tr></thead>
+          <tbody data-testid="files-tbody"><tr><td colspan="5" style="color:var(--fg-faint)">No files yet.</td></tr></tbody>
+        </table>
+      </div>
+      <div class="previews" data-testid="files-previews"></div>
+      <pre class="tb-out" data-testid="files-read-out" style="margin-top:12px">File contents appear here after you press “Read”.</pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>File System Access API <small>real read/write handles — secure context and a user gesture required</small></h2>
+    <div class="tb-section__body">
+      <p class="tb-note" data-testid="files-fsa-support"></p>
+      <div class="tb-row">
+        <button class="tb-btn" type="button" data-testid="files-fsa-open">showOpenFilePicker()</button>
+        <button class="tb-btn" type="button" data-testid="files-fsa-save">showSaveFilePicker()</button>
+        <button class="tb-btn" type="button" data-testid="files-fsa-dir">showDirectoryPicker()</button>
+      </div>
+      <pre class="tb-out" data-testid="files-fsa-out" style="margin-top:12px"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Downloads <small>every way a page hands a file to the browser</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-row">
+        <a class="tb-btn" href="../assets/media/sample.pdf" download data-testid="files-dl-pdf">Download PDF (download attr)</a>
+        <a class="tb-btn" href="../assets/media/sample.pdf" target="_blank" rel="noopener" data-testid="files-open-pdf">Open PDF in a tab</a>
+        <a class="tb-btn" href="../assets/media/sample.csv" download="renamed-data.csv" data-testid="files-dl-renamed">Download CSV, renamed</a>
+        <button class="tb-btn" type="button" data-testid="files-dl-blob">Download generated Blob</button>
+        <button class="tb-btn" type="button" data-testid="files-dl-datauri">Download data: URI</button>
+        <button class="tb-btn" type="button" data-testid="files-dl-large">Download 5 MB file</button>
+      </div>
+      <p class="tb-note" style="margin-top:12px">Files you can drag <em>out</em> of the page onto the desktop:</p>
+      <div class="tb-row">
+        <div draggable="true" data-testid="files-dragout-text"
+             style="padding:8px 12px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);cursor:grab">
+          ⇱ Drag me out (text/plain + text/uri-list)
+        </div>
+        <img src="../assets/media/thumb.png" alt="Draggable sample image" draggable="true"
+             data-testid="files-dragout-image" style="height:48px;border-radius:var(--radius-sm);cursor:grab">
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Upload progress <small>XHR against this site's own assets, so it works offline too</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-row" style="margin-bottom:10px">
+        <button class="tb-btn" type="button" data-testid="files-upload-start">Simulate upload of selection</button>
+        <button class="tb-btn" type="button" data-testid="files-fetch-progress">Fetch with progress (stream reader)</button>
+      </div>
+      <div class="bar"><span data-testid="files-progress-bar"></span></div>
+      <pre class="tb-out" data-testid="files-progress-out" style="margin-top:10px">Idle.</pre>
+    </div>
+  </section>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var q = function (id) { return document.querySelector('[data-testid="' + id + '"]'); };
+  var selected = [];
+
+  function fmtSize(n) {
+    if (n < 1024) return n + ' B';
+    if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+    return (n / 1048576).toFixed(2) + ' MB';
+  }
+
+  function addFiles(list, origin) {
+    Array.prototype.forEach.call(list, function (f) { selected.push({ file: f, origin: origin }); });
+    renderTable();
+    renderPreviews();
+  }
+
+  function renderTable() {
+    var tb = q('files-tbody');
+    tb.textContent = '';
+    if (!selected.length) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td colspan="5" style="color:var(--fg-faint)">No files yet.</td>';
+      tb.appendChild(tr);
+      return;
+    }
+    selected.forEach(function (entry, i) {
+      var f = entry.file;
+      var tr = document.createElement('tr');
+      tr.setAttribute('data-testid', 'files-row-' + i);
+      tr.innerHTML = '<td></td><td></td><td></td><td></td><td></td>';
+      var cells = tr.children;
+      cells[0].textContent = (f.webkitRelativePath || f.name);
+      cells[1].textContent = f.type || '—';
+      cells[2].textContent = fmtSize(f.size);
+      cells[3].textContent = new Date(f.lastModified).toLocaleString();
+      var btn = document.createElement('button');
+      btn.className = 'tb-btn tb-btn--sm';
+      btn.type = 'button';
+      btn.textContent = 'Read';
+      btn.setAttribute('data-testid', 'files-read-' + i);
+      btn.addEventListener('click', function () { readFile(f); });
+      cells[4].appendChild(btn);
+      tb.appendChild(tr);
+    });
+  }
+
+  function renderPreviews() {
+    var wrap = q('files-previews');
+    wrap.textContent = '';
+    selected.filter(function (e) { return /^image\//.test(e.file.type); }).forEach(function (e, i) {
+      var url = URL.createObjectURL(e.file);
+      var fig = document.createElement('figure');
+      fig.innerHTML = '<img alt=""><figcaption></figcaption>';
+      var img = fig.querySelector('img');
+      img.src = url;
+      img.setAttribute('data-testid', 'files-preview-' + i);
+      img.addEventListener('load', function () { URL.revokeObjectURL(url); });
+      fig.querySelector('figcaption').textContent = e.file.name;
+      wrap.appendChild(fig);
+    });
+  }
+
+  function readFile(f) {
+    var out = q('files-read-out');
+    if (/^image\//.test(f.type)) {
+      out.textContent = 'Image read as data URL (truncated):\n';
+      var r0 = new FileReader();
+      r0.onload = function () { out.textContent += String(r0.result).slice(0, 300) + '…'; };
+      r0.readAsDataURL(f);
+      return;
+    }
+    var r = new FileReader();
+    r.onload = function () {
+      var text = String(r.result);
+      out.textContent = f.name + '  (' + fmtSize(f.size) + ')\n\n' +
+        text.slice(0, 2000) + (text.length > 2000 ? '\n… truncated' : '');
+    };
+    r.onerror = function () { out.textContent = 'FileReader error: ' + r.error; };
+    r.readAsText(f.slice(0, 200000));
+  }
+
+  ['files-single', 'files-multiple', 'files-images', 'files-extensions', 'files-directory', 'files-custom-input']
+    .forEach(function (id) {
+      q(id).addEventListener('change', function (e) { addFiles(e.target.files, id); });
+    });
+  q('files-custom-trigger').addEventListener('click', function () { q('files-custom-input').click(); });
+  q('files-clear').addEventListener('click', function () {
+    document.querySelectorAll('input[type="file"]').forEach(function (n) { n.value = ''; });
+    selected = []; renderTable(); renderPreviews();
+    q('files-read-out').textContent = 'Cleared.';
+  });
+
+  /* ---------------- drop zone ---------------- */
+  var drop = q('files-dropzone'), dropOut = q('files-drop-out');
+  ['dragenter', 'dragover'].forEach(function (t) {
+    drop.addEventListener(t, function (e) { e.preventDefault(); drop.setAttribute('data-over', 'true'); });
+  });
+  ['dragleave', 'drop'].forEach(function (t) {
+    drop.addEventListener(t, function () { drop.setAttribute('data-over', 'false'); });
+  });
+  drop.addEventListener('drop', function (e) {
+    e.preventDefault();
+    var dt = e.dataTransfer;
+    var report = { files: [], items: [], types: Array.prototype.slice.call(dt.types || []) };
+    Array.prototype.forEach.call(dt.files || [], function (f) {
+      report.files.push({ name: f.name, size: f.size, type: f.type });
+    });
+    Array.prototype.forEach.call(dt.items || [], function (it) {
+      report.items.push({ kind: it.kind, type: it.type });
+      if (it.kind === 'string') {
+        it.getAsString(function (s) {
+          dropOut.textContent += '\n' + it.type + ' → ' + JSON.stringify(s.slice(0, 200));
+        });
+      }
+      var entry = it.webkitGetAsEntry && it.webkitGetAsEntry();
+      if (entry && entry.isDirectory) {
+        entry.createReader().readEntries(function (entries) {
+          dropOut.textContent += '\ndirectory ' + entry.name + ' → ' +
+            entries.map(function (x) { return x.name; }).join(', ');
+        });
+      }
+    });
+    dropOut.textContent = JSON.stringify(report, null, 2);
+    if (dt.files && dt.files.length) addFiles(dt.files, 'drop');
+  });
+  drop.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); q('files-multiple').click(); }
+  });
+  document.addEventListener('paste', function (e) {
+    var items = (e.clipboardData || {}).items || [];
+    var got = [];
+    Array.prototype.forEach.call(items, function (it) {
+      if (it.kind === 'file') { var f = it.getAsFile(); if (f) got.push(f); }
+    });
+    if (got.length) { addFiles(got, 'paste'); dropOut.textContent = 'Pasted ' + got.length + ' file(s).'; }
+  });
+
+  /* ---------------- File System Access ---------------- */
+  var hasFSA = typeof window.showOpenFilePicker === 'function';
+  q('files-fsa-support').innerHTML = hasFSA
+    ? '<span class="tb-badge tb-badge--ok">supported</span> This browser exposes the File System Access API.'
+    : '<span class="tb-badge tb-badge--warn">not supported</span> The buttons below will report that instead of throwing.';
+  var fsaOut = q('files-fsa-out');
+  function fsaGuard(fn) {
+    return function () {
+      if (!hasFSA) { fsaOut.textContent = 'File System Access API is not available in this browser.'; return; }
+      fn().catch(function (err) { fsaOut.textContent = err.name + ': ' + err.message; });
+    };
+  }
+  q('files-fsa-open').addEventListener('click', fsaGuard(function () {
+    return window.showOpenFilePicker({ multiple: true }).then(function (handles) {
+      return Promise.all(handles.map(function (h) { return h.getFile(); })).then(function (fs) {
+        addFiles(fs, 'fsa');
+        fsaOut.textContent = 'Opened:\n' + fs.map(function (f) {
+          return f.name + ' (' + f.size + ' bytes)'; }).join('\n');
+      });
+    });
+  }));
+  q('files-fsa-save').addEventListener('click', fsaGuard(function () {
+    return window.showSaveFilePicker({ suggestedName: 'testbed-note.txt' }).then(function (h) {
+      return h.createWritable().then(function (w) {
+        return w.write('Written by the browser testbed at ' + new Date().toISOString() + '\n')
+          .then(function () { return w.close(); })
+          .then(function () { fsaOut.textContent = 'Wrote ' + h.name + ' through a FileSystemWritableFileStream.'; });
+      });
+    });
+  }));
+  q('files-fsa-dir').addEventListener('click', fsaGuard(function () {
+    return window.showDirectoryPicker().then(function (dir) {
+      var names = [];
+      var it = dir.values();
+      function step() {
+        return it.next().then(function (r) {
+          if (r.done || names.length >= 50) {
+            fsaOut.textContent = 'Directory ' + dir.name + ':\n' + names.join('\n');
+            return;
+          }
+          names.push(r.value.kind + '  ' + r.value.name);
+          return step();
+        });
+      }
+      return step();
+    });
+  }));
+
+  /* ---------------- downloads ---------------- */
+  function saveBlob(blob, name) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  }
+  q('files-dl-blob').addEventListener('click', function () {
+    saveBlob(new Blob(['generated,at\n"' + new Date().toISOString() + '",blob\n'],
+      { type: 'text/csv' }), 'generated.csv');
+  });
+  q('files-dl-datauri').addEventListener('click', function () {
+    var a = document.createElement('a');
+    a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent('Downloaded from a data: URI.\n');
+    a.download = 'data-uri.txt';
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  q('files-dl-large').addEventListener('click', function () {
+    var chunk = new Uint8Array(1048576).fill(65);
+    saveBlob(new Blob([chunk, chunk, chunk, chunk, chunk], { type: 'application/octet-stream' }), 'five-megabytes.bin');
+  });
+
+  q('files-dragout-text').addEventListener('dragstart', function (e) {
+    e.dataTransfer.setData('text/plain', 'Dragged out of the browser testbed.');
+    e.dataTransfer.setData('text/uri-list', location.href);
+    e.dataTransfer.effectAllowed = 'copy';
+  });
+
+  /* ---------------- progress ---------------- */
+  var bar = q('files-progress-bar'), pOut = q('files-progress-out');
+  q('files-upload-start').addEventListener('click', function () {
+    if (!selected.length) { pOut.textContent = 'Pick some files first.'; return; }
+    var total = selected.reduce(function (n, e) { return n + e.file.size; }, 0);
+    var sent = 0, t0 = performance.now();
+    pOut.textContent = 'Uploading ' + selected.length + ' file(s), ' + fmtSize(total) + ' — nothing leaves the browser.';
+    (function tick() {
+      sent = Math.min(total, sent + Math.max(total / 60, 4096));
+      bar.style.width = (sent / total * 100).toFixed(1) + '%';
+      if (sent < total) requestAnimationFrame(tick);
+      else pOut.textContent += '\nDone in ' + Math.round(performance.now() - t0) + ' ms.';
+    })();
+  });
+  q('files-fetch-progress').addEventListener('click', function () {
+    bar.style.width = '0%';
+    pOut.textContent = 'Fetching ../assets/media/wide.png with a streaming reader…';
+    fetch('../assets/media/wide.png').then(function (res) {
+      var total = +res.headers.get('content-length') || 0;
+      if (!res.body || !res.body.getReader) {
+        pOut.textContent = 'Response streams are not supported; fell back to blob().';
+        return res.blob().then(function (b) { bar.style.width = '100%'; pOut.textContent += '\nGot ' + fmtSize(b.size); });
+      }
+      var reader = res.body.getReader(), got = 0;
+      return (function pump() {
+        return reader.read().then(function (r) {
+          if (r.done) {
+            pOut.textContent = 'Streamed ' + fmtSize(got) + ' in chunks.';
+            bar.style.width = '100%';
+            return;
+          }
+          got += r.value.length;
+          if (total) bar.style.width = (got / total * 100).toFixed(1) + '%';
+          return pump();
+        });
+      })();
+    }).catch(function (e) { pOut.textContent = 'fetch failed: ' + e.message; });
+  });
+  document.documentElement.setAttribute('data-page-script', 'ok');
+});
+</script>
+</body>
+</html>

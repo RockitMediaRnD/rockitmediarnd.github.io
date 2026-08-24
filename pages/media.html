@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Audio, video &amp; graphics — Browser Testbed</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/testbed.css">
+<script src="../assets/js/nav-data.js" defer></script>
+<script src="../assets/js/testbed.js" defer></script>
+<style>
+  video, audio { width:100%; border-radius:var(--radius-sm); background:#000; }
+  audio { background:transparent; }
+  .media-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px; }
+  .imgbox { border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px; background:var(--bg-sunken); }
+  .imgbox img { width:100%; height:130px; object-fit:cover; border-radius:4px; display:block; background:var(--bg-elev); }
+  .imgbox b { font-size:12px; display:block; margin-top:6px; }
+  .imgbox span { font-size:11px; color:var(--fg-faint); }
+  canvas.demo { width:100%; height:180px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg-sunken); }
+  .bgimg { height:130px; border-radius:var(--radius-sm); border:1px solid var(--border); }
+</style>
+</head>
+<body data-page="media">
+<main class="tb-main" id="main">
+
+  <section class="tb-section">
+    <h2>Video element <small>controls, captions, rates, fullscreen and picture-in-picture</small></h2>
+    <div class="tb-section__body">
+      <div class="media-grid">
+        <div>
+          <video data-testid="media-video" controls preload="metadata" playsinline
+                 poster="../assets/media/photo.jpg" crossorigin="anonymous">
+            <source src="../assets/media/clip.mp4" type="video/mp4">
+            <track src="../assets/media/subtitles.vtt" kind="subtitles" srclang="en" label="English" default>
+            <track src="../assets/media/subtitles-uk.vtt" kind="subtitles" srclang="uk" label="Українська">
+            Your browser cannot play this video.
+          </video>
+          <p class="tb-hint">H.264/MP4, 6 s, 640×360, with two subtitle tracks and a poster.</p>
+        </div>
+        <div>
+          <div class="tb-stack">
+            <div class="tb-row">
+              <button class="tb-btn tb-btn--sm" type="button" data-testid="media-play">play()</button>
+              <button class="tb-btn tb-btn--sm" type="button" data-testid="media-pause">pause()</button>
+              <button class="tb-btn tb-btn--sm" type="button" data-testid="media-seek">Seek to 3 s</button>
+              <button class="tb-btn tb-btn--sm" type="button" data-testid="media-mute">Toggle mute</button>
+              <button class="tb-btn tb-btn--sm" type="button" data-testid="media-loop">Toggle loop</button>
+            </div>
+            <div class="tb-row">
+              <button class="tb-btn tb-btn--sm" type="button" data-testid="media-rate-slow">0.5×</button>
+              <button class="tb-btn tb-btn--sm" type="button" data-testid="media-rate-normal">1×</button>
+              <button class="tb-btn tb-btn--sm" type="button" data-testid="media-rate-fast">2×</button>
+              <button class="tb-btn tb-btn--sm" type="button" data-testid="media-fullscreen">Fullscreen</button>
+              <button class="tb-btn tb-btn--sm" type="button" data-testid="media-pip">Picture-in-picture</button>
+            </div>
+            <div class="tb-field">
+              <label for="vol">Volume</label>
+              <input id="vol" type="range" min="0" max="1" step="0.05" value="1" data-testid="media-volume">
+            </div>
+            <div class="tb-field">
+              <label for="trk">Subtitle track</label>
+              <select id="trk" data-testid="media-track"><option value="-1">Off</option></select>
+            </div>
+            <pre class="tb-out" data-testid="media-video-out"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Autoplay policy <small>a muted video may start on its own; an unmuted one usually may not</small></h2>
+    <div class="tb-section__body">
+      <div class="media-grid">
+        <div>
+          <video data-testid="media-autoplay-muted" autoplay muted loop playsinline preload="auto"
+                 src="../assets/media/clip.mp4" style="height:150px"></video>
+          <p class="tb-hint">autoplay + muted — <b data-testid="media-autoplay-muted-status">checking…</b></p>
+        </div>
+        <div>
+          <video data-testid="media-autoplay-loud" controls playsinline preload="metadata"
+                 src="../assets/media/clip.mp4" style="height:150px"></video>
+          <p class="tb-hint">Scripted play() without a gesture — <b data-testid="media-autoplay-loud-status">checking…</b></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Audio <small>element playback, Web Audio synthesis and the Media Session API</small></h2>
+    <div class="tb-section__body">
+      <div class="media-grid">
+        <div>
+          <audio data-testid="media-audio" controls preload="metadata" src="../assets/media/tone.wav"></audio>
+          <p class="tb-hint">WAV, 2.5 s</p>
+          <audio data-testid="media-audio-m4a" controls preload="metadata" src="../assets/media/tone.m4a"></audio>
+          <p class="tb-hint">AAC in M4A — a codec support check in itself</p>
+        </div>
+        <div class="tb-stack">
+          <div class="tb-row">
+            <button class="tb-btn tb-btn--sm" type="button" data-testid="media-beep">Web Audio beep</button>
+            <button class="tb-btn tb-btn--sm" type="button" data-testid="media-sweep">Frequency sweep</button>
+            <button class="tb-btn tb-btn--sm" type="button" data-testid="media-session">Set Media Session metadata</button>
+          </div>
+          <canvas class="demo" data-testid="media-visualizer"></canvas>
+          <pre class="tb-out" data-testid="media-audio-out">Web Audio output appears here.</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Images <small>formats, responsive sources, lazy loading and decoding</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-grid" style="grid-template-columns:repeat(auto-fill,minmax(190px,1fr))">
+        <div class="imgbox"><img src="../assets/media/photo.png" alt="PNG test card" data-testid="media-img-png"><b>PNG</b><span data-testid="media-img-png-status">…</span></div>
+        <div class="imgbox"><img src="../assets/media/photo.jpg" alt="JPEG test card" data-testid="media-img-jpg"><b>JPEG</b><span data-testid="media-img-jpg-status">…</span></div>
+        <div class="imgbox"><img src="../assets/media/photo.avif" alt="AVIF test card" data-testid="media-img-avif"><b>AVIF</b><span data-testid="media-img-avif-status">…</span></div>
+        <div class="imgbox"><img src="../assets/media/photo.heic" alt="HEIC test card" data-testid="media-img-heic"><b>HEIC</b><span data-testid="media-img-heic-status">…</span></div>
+        <div class="imgbox"><img src="../assets/media/missing-on-purpose.png" alt="Deliberately missing image" data-testid="media-img-broken"><b>404 image</b><span data-testid="media-img-broken-status">…</span></div>
+        <div class="imgbox">
+          <picture>
+            <source srcset="../assets/media/photo.avif" type="image/avif">
+            <source srcset="../assets/media/photo.jpg" type="image/jpeg">
+            <img src="../assets/media/photo.png" alt="picture element negotiation" data-testid="media-img-picture">
+          </picture>
+          <b>&lt;picture&gt;</b><span>AVIF → JPEG → PNG</span>
+        </div>
+        <div class="imgbox">
+          <img src="../assets/media/thumb.png"
+               srcset="../assets/media/thumb.png 128w, ../assets/media/photo.png 640w, ../assets/media/wide.png 1600w"
+               sizes="(max-width: 600px) 100vw, 190px" alt="srcset negotiation" data-testid="media-img-srcset">
+          <b>srcset / sizes</b><span data-testid="media-img-srcset-status">…</span>
+        </div>
+        <div class="imgbox">
+          <img src="../assets/media/wide.png" loading="lazy" decoding="async" alt="Lazily loaded"
+               data-testid="media-img-lazy"><b>loading="lazy"</b><span>1600×900</span>
+        </div>
+        <div class="imgbox">
+          <div class="bgimg" data-testid="media-img-background"
+               style="background-image:url('../assets/media/photo.png');background-size:cover;background-position:center"></div>
+          <b>CSS background</b><span>background-size: cover</span>
+        </div>
+        <div class="imgbox">
+          <svg viewBox="0 0 200 130" width="100%" height="130" data-testid="media-img-svg" role="img" aria-label="Inline SVG sample">
+            <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#2f6df6"/><stop offset="1" stop-color="#17864a"/></linearGradient></defs>
+            <rect width="200" height="130" fill="url(#g)" rx="6"/>
+            <circle cx="60" cy="65" r="34" fill="#fff" opacity=".85"/>
+            <path d="M110 100 L150 35 L190 100 Z" fill="#fff" opacity=".7"/>
+            <text x="10" y="120" fill="#fff" font-size="12" font-family="sans-serif">inline SVG</text>
+          </svg>
+          <b>SVG</b><span>gradients, shapes, text</span>
+        </div>
+      </div>
+      <div class="tb-row" style="margin-top:12px">
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="media-img-reload">Reload all images (cache-busted)</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="media-img-decode">decode() every image</button>
+      </div>
+      <pre class="tb-out" data-testid="media-img-out" style="margin-top:10px"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Canvas &amp; WebGL</h2>
+    <div class="tb-section__body">
+      <div class="media-grid">
+        <div>
+          <canvas class="demo" data-testid="media-canvas2d"></canvas>
+          <p class="tb-hint">2D context: paths, gradients, text, images, animation</p>
+        </div>
+        <div>
+          <canvas class="demo" data-testid="media-webgl"></canvas>
+          <p class="tb-hint" data-testid="media-webgl-status">WebGL: initialising…</p>
+        </div>
+      </div>
+      <div class="tb-row" style="margin-top:10px">
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="media-canvas-animate">Toggle canvas animation</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="media-canvas-export">Canvas → PNG download</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="media-canvas-video">Draw current video frame</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var q = function (id) { return document.querySelector('[data-testid="' + id + '"]'); };
+
+  /* ---------------- video ---------------- */
+  var v = q('media-video'), vOut = q('media-video-out');
+  function vReport() {
+    vOut.textContent = JSON.stringify({
+      currentTime: +v.currentTime.toFixed(2), duration: isNaN(v.duration) ? null : +v.duration.toFixed(2),
+      paused: v.paused, muted: v.muted, volume: +v.volume.toFixed(2), loop: v.loop,
+      playbackRate: v.playbackRate, readyState: v.readyState, networkState: v.networkState,
+      size: v.videoWidth + '×' + v.videoHeight,
+      buffered: v.buffered.length ? (+v.buffered.end(v.buffered.length - 1).toFixed(2)) + ' s' : 'none',
+      textTracks: v.textTracks.length
+    }, null, 2);
+  }
+  ['loadedmetadata', 'timeupdate', 'play', 'pause', 'ratechange', 'volumechange', 'ended', 'error']
+    .forEach(function (e) { v.addEventListener(e, vReport); });
+  vReport();
+
+  q('media-play').addEventListener('click', function () {
+    v.play().catch(function (e) { vOut.textContent = 'play() rejected: ' + e.name + ' — ' + e.message; });
+  });
+  q('media-pause').addEventListener('click', function () { v.pause(); });
+  q('media-seek').addEventListener('click', function () { v.currentTime = 3; });
+  q('media-mute').addEventListener('click', function () { v.muted = !v.muted; });
+  q('media-loop').addEventListener('click', function () { v.loop = !v.loop; vReport(); });
+  q('media-rate-slow').addEventListener('click', function () { v.playbackRate = 0.5; });
+  q('media-rate-normal').addEventListener('click', function () { v.playbackRate = 1; });
+  q('media-rate-fast').addEventListener('click', function () { v.playbackRate = 2; });
+  q('media-volume').addEventListener('input', function () { v.volume = +this.value; });
+  q('media-fullscreen').addEventListener('click', function () {
+    var fn = v.requestFullscreen || v.webkitRequestFullscreen || v.webkitEnterFullscreen;
+    if (fn) fn.call(v).catch && fn.call(v);
+    else vOut.textContent = 'No fullscreen API on this element.';
+  });
+  q('media-pip').addEventListener('click', function () {
+    if (document.pictureInPictureElement) { document.exitPictureInPicture(); return; }
+    if (v.requestPictureInPicture) {
+      v.requestPictureInPicture().catch(function (e) { vOut.textContent = 'PiP failed: ' + e.message; });
+    } else if (v.webkitSetPresentationMode) {
+      v.webkitSetPresentationMode('picture-in-picture');
+    } else {
+      vOut.textContent = 'Picture-in-picture is not supported here.';
+    }
+  });
+  var trkSel = q('media-track');
+  Array.prototype.forEach.call(v.textTracks, function (t, i) {
+    trkSel.appendChild(new Option(t.label + ' (' + t.language + ')', i));
+  });
+  trkSel.addEventListener('change', function () {
+    Array.prototype.forEach.call(v.textTracks, function (t, i) {
+      t.mode = String(i) === trkSel.value ? 'showing' : 'disabled';
+    });
+  });
+
+  /* ---------------- autoplay probes ---------------- */
+  var am = q('media-autoplay-muted');
+  setTimeout(function () {
+    q('media-autoplay-muted-status').textContent = am.paused
+      ? 'blocked (still paused)' : 'playing';
+  }, 1200);
+  var al = q('media-autoplay-loud');
+  al.play().then(function () {
+    q('media-autoplay-loud-status').textContent = 'allowed — playing without a gesture';
+    al.pause();
+  }).catch(function (e) {
+    q('media-autoplay-loud-status').textContent = 'blocked: ' + e.name;
+  });
+
+  /* ---------------- Web Audio ---------------- */
+  var ac = null, viz = q('media-visualizer'), vizCtx = viz.getContext('2d'), analyser = null;
+  function audio() {
+    if (!ac) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) { q('media-audio-out').textContent = 'Web Audio is not supported.'; return null; }
+      ac = new AC();
+      analyser = ac.createAnalyser();
+      analyser.fftSize = 1024;
+      analyser.connect(ac.destination);
+      drawViz();
+    }
+    if (ac.state === 'suspended') ac.resume();
+    return ac;
+  }
+  function drawViz() {
+    var data = new Uint8Array(analyser.frequencyBinCount);
+    (function loop() {
+      viz.width = viz.clientWidth; viz.height = viz.clientHeight;
+      analyser.getByteFrequencyData(data);
+      vizCtx.clearRect(0, 0, viz.width, viz.height);
+      var bw = viz.width / 64;
+      for (var i = 0; i < 64; i++) {
+        var h = data[i] / 255 * viz.height;
+        vizCtx.fillStyle = 'hsl(' + (210 + i * 2) + ' 80% 60%)';
+        vizCtx.fillRect(i * bw, viz.height - h, bw - 1, h);
+      }
+      requestAnimationFrame(loop);
+    })();
+  }
+  q('media-beep').addEventListener('click', function () {
+    var c = audio(); if (!c) return;
+    var o = c.createOscillator(), g = c.createGain();
+    o.frequency.value = 660; o.type = 'sine';
+    g.gain.setValueAtTime(0.0001, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.3, c.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.5);
+    o.connect(g); g.connect(analyser);
+    o.start(); o.stop(c.currentTime + 0.5);
+    q('media-audio-out').textContent = 'AudioContext state: ' + c.state + ', sampleRate ' + c.sampleRate;
+  });
+  q('media-sweep').addEventListener('click', function () {
+    var c = audio(); if (!c) return;
+    var o = c.createOscillator(), g = c.createGain();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(120, c.currentTime);
+    o.frequency.exponentialRampToValueAtTime(1800, c.currentTime + 1.5);
+    g.gain.value = 0.12;
+    o.connect(g); g.connect(analyser);
+    o.start(); o.stop(c.currentTime + 1.5);
+    q('media-audio-out').textContent = 'Sweeping 120 Hz → 1800 Hz over 1.5 s';
+  });
+  q('media-session').addEventListener('click', function () {
+    if (!navigator.mediaSession) { q('media-audio-out').textContent = 'Media Session API not supported.'; return; }
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: 'Testbed tone', artist: 'Browser Testbed', album: 'Synthetic samples',
+      artwork: [{ src: '../assets/media/thumb.png', sizes: '128x128', type: 'image/png' }]
+    });
+    ['play', 'pause', 'seekbackward', 'seekforward', 'previoustrack', 'nexttrack'].forEach(function (a) {
+      try {
+        navigator.mediaSession.setActionHandler(a, function () {
+          q('media-audio-out').textContent = 'Media Session action: ' + a;
+        });
+      } catch (e) { /* unsupported action */ }
+    });
+    q('media-audio-out').textContent = 'Media Session metadata set — check the OS media controls.';
+  });
+
+  /* ---------------- images ---------------- */
+  var imgIds = ['media-img-png', 'media-img-jpg', 'media-img-avif', 'media-img-heic',
+                'media-img-broken', 'media-img-srcset'];
+  imgIds.forEach(function (id) {
+    var img = q(id), status = q(id + '-status');
+    function done() {
+      if (!status) return;
+      status.textContent = img.naturalWidth
+        ? img.naturalWidth + '×' + img.naturalHeight + (img.currentSrc ? ' · ' + img.currentSrc.split('/').pop() : '')
+        : 'failed to load';
+      if (!img.naturalWidth) status.style.color = 'var(--err)';
+    }
+    if (img.complete) done(); else { img.addEventListener('load', done); img.addEventListener('error', done); }
+  });
+  q('media-img-reload').addEventListener('click', function () {
+    document.querySelectorAll('.imgbox img').forEach(function (img) {
+      var u = img.src.split('?')[0];
+      img.src = u + '?v=' + Date.now();
+    });
+    q('media-img-out').textContent = 'All images re-requested with a cache-busting query string.';
+  });
+  q('media-img-decode').addEventListener('click', function () {
+    var imgs = Array.prototype.slice.call(document.querySelectorAll('.imgbox img'));
+    Promise.all(imgs.map(function (i) {
+      return i.decode ? i.decode().then(function () { return i.alt + ': ok'; },
+        function (e) { return i.alt + ': ' + e.name; }) : Promise.resolve('decode() unsupported');
+    })).then(function (r) { q('media-img-out').textContent = r.join('\n'); });
+  });
+
+  /* ---------------- canvas ---------------- */
+  var c2 = q('media-canvas2d'), ctx = c2.getContext('2d'), animating = true, t0 = performance.now();
+  function frame() {
+    c2.width = c2.clientWidth; c2.height = c2.clientHeight;
+    var t = (performance.now() - t0) / 1000;
+    var g = ctx.createLinearGradient(0, 0, c2.width, c2.height);
+    g.addColorStop(0, '#12203f'); g.addColorStop(1, '#2f6df6');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, c2.width, c2.height);
+    ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (var x = 0; x <= c2.width; x += 4) {
+      var y = c2.height / 2 + Math.sin(x / 40 + t * 2) * (c2.height / 4);
+      x ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.font = '14px system-ui, sans-serif';
+    ctx.fillText('2D canvas · ' + c2.width + '×' + c2.height + ' · dpr ' + window.devicePixelRatio, 12, 22);
+    if (animating) requestAnimationFrame(frame);
+  }
+  frame();
+  q('media-canvas-animate').addEventListener('click', function () {
+    animating = !animating; if (animating) frame();
+  });
+  q('media-canvas-export').addEventListener('click', function () {
+    c2.toBlob(function (b) {
+      var url = URL.createObjectURL(b);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'canvas.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 3000);
+    });
+  });
+  q('media-canvas-video').addEventListener('click', function () {
+    animating = false;
+    ctx.drawImage(v, 0, 0, c2.width, c2.height);
+    ctx.fillStyle = '#fff';
+    ctx.fillText('frame at ' + v.currentTime.toFixed(2) + ' s', 12, c2.height - 12);
+  });
+
+  /* ---------------- WebGL ---------------- */
+  var gl = null, glc = q('media-webgl');
+  try { gl = glc.getContext('webgl2') || glc.getContext('webgl') || glc.getContext('experimental-webgl'); }
+  catch (e) { /* no context */ }
+  if (!gl) {
+    q('media-webgl-status').textContent = 'WebGL: no context available.';
+  } else {
+    glc.width = glc.clientWidth; glc.height = glc.clientHeight;
+    var vs = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vs, 'attribute vec2 p; varying vec2 v; void main(){ v = p; gl_Position = vec4(p, 0.0, 1.0); }');
+    gl.compileShader(vs);
+    var fs = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fs, 'precision mediump float; varying vec2 v; uniform float t;' +
+      'void main(){ gl_FragColor = vec4(0.5 + 0.5 * sin(t + v.x * 3.0), 0.4 + 0.4 * cos(t + v.y * 3.0), 0.9, 1.0); }');
+    gl.compileShader(fs);
+    var prog = gl.createProgram();
+    gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog); gl.useProgram(prog);
+    var buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-0.9, -0.8, 0.9, -0.8, 0, 0.9]), gl.STATIC_DRAW);
+    var loc = gl.getAttribLocation(prog, 'p');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    var tLoc = gl.getUniformLocation(prog, 't');
+    (function draw() {
+      gl.viewport(0, 0, glc.width, glc.height);
+      gl.clearColor(0.06, 0.07, 0.1, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.uniform1f(tLoc, performance.now() / 700);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      requestAnimationFrame(draw);
+    })();
+    var dbg = gl.getExtension('WEBGL_debug_renderer_info');
+    q('media-webgl-status').textContent = 'WebGL ' +
+      (gl.getParameter(gl.VERSION) || '') +
+      (dbg ? ' · ' + gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : '');
+  }
+  document.documentElement.setAttribute('data-page-script', 'ok');
+});
+</script>
+</body>
+</html>

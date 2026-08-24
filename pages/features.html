@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Feature detection — Browser Testbed</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/testbed.css">
+<script src="../assets/js/nav-data.js" defer></script>
+<script src="../assets/js/features.js" defer></script>
+<script src="../assets/js/testbed.js" defer></script>
+<style>
+  .fgroup { break-inside:avoid; }
+  .frow { display:flex; align-items:center; gap:8px; padding:4px 0; border-bottom:1px solid var(--border);
+          font-size:13.5px; }
+  .frow span:first-child { flex:1; }
+  .mark { font-weight:700; width:18px; text-align:center; }
+  .mark[data-v="yes"] { color:var(--ok); }
+  .mark[data-v="no"] { color:var(--err); }
+  .mark[data-v="partial"] { color:var(--warn); }
+  .summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; }
+  .summary div { border:1px solid var(--border); border-radius:var(--radius); padding:10px 12px; background:var(--bg-elev); }
+  .summary b { display:block; font-size:22px; }
+  .summary span { font-size:11.5px; color:var(--fg-faint); text-transform:uppercase; letter-spacing:.05em; }
+</style>
+</head>
+<body data-page="features">
+<main class="tb-main" id="main">
+
+  <section class="tb-section">
+    <h2>Summary</h2>
+    <div class="tb-section__body">
+      <div class="summary" data-testid="feat-summary"></div>
+      <div class="tb-row" style="margin-top:14px">
+        <button class="tb-btn" type="button" data-testid="feat-rerun">Re-run detection</button>
+        <button class="tb-btn" type="button" data-testid="feat-copy">Copy report as JSON</button>
+        <button class="tb-btn" type="button" data-testid="feat-download">Download report</button>
+        <label class="tb-check"><input type="checkbox" data-testid="feat-only-missing"> <span>Show only unsupported</span></label>
+      </div>
+      <p class="tb-hint" style="margin-top:8px">The same data is available to automation as
+         <code>window.__testbed.features()</code>.</p>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Results</h2>
+    <div class="tb-section__body">
+      <div class="tb-grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr));align-items:start"
+           data-testid="feat-results"></div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>User agent</h2>
+    <div class="tb-section__body">
+      <pre class="tb-out" data-testid="feat-ua" style="max-height:none"></pre>
+    </div>
+  </section>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var q = function (id) { return document.querySelector('[data-testid="' + id + '"]'); };
+  var report = null;
+
+  function classify(v) {
+    if (v === true) return 'yes';
+    if (v === false || v === '' || v === 'no') return 'no';
+    if (v === 'probably' || v === 'maybe') return 'partial';
+    return 'partial';
+  }
+  function markFor(v) { return { yes: '✓', no: '✗', partial: '~' }[classify(v)]; }
+
+  function render() {
+    var wrap = q('feat-results');
+    wrap.textContent = '';
+    var onlyMissing = q('feat-only-missing').checked;
+    var yes = 0, no = 0, partial = 0;
+    Object.keys(report).forEach(function (group) {
+      var items = Object.keys(report[group]);
+      var box = document.createElement('div');
+      box.className = 'tb-section fgroup';
+      box.style.margin = '0';
+      var h = document.createElement('h2');
+      h.textContent = group;
+      box.appendChild(h);
+      var body = document.createElement('div');
+      body.className = 'tb-section__body';
+      body.style.padding = '8px 14px';
+      var shown = 0;
+      items.forEach(function (name) {
+        var v = report[group][name], kind = classify(v);
+        if (kind === 'yes') yes++; else if (kind === 'no') no++; else partial++;
+        if (onlyMissing && kind === 'yes') return;
+        shown++;
+        var row = document.createElement('div');
+        row.className = 'frow';
+        row.setAttribute('data-testid', 'feat-' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''));
+        var label = document.createElement('span');
+        label.textContent = name;
+        var detail = document.createElement('span');
+        detail.style.cssText = 'font-size:11.5px;color:var(--fg-faint)';
+        detail.textContent = (typeof v === 'string' && v !== 'probe') ? v : '';
+        var mark = document.createElement('span');
+        mark.className = 'mark';
+        mark.setAttribute('data-v', kind);
+        mark.textContent = markFor(v);
+        row.appendChild(label); row.appendChild(detail); row.appendChild(mark);
+        body.appendChild(row);
+      });
+      if (!shown) return;
+      box.appendChild(body);
+      wrap.appendChild(box);
+    });
+
+    var total = yes + no + partial;
+    q('feat-summary').innerHTML =
+      '<div><span>Checks</span><b data-testid="feat-total">' + total + '</b></div>' +
+      '<div><span>Supported</span><b style="color:var(--ok)" data-testid="feat-yes">' + yes + '</b></div>' +
+      '<div><span>Partial</span><b style="color:var(--warn)" data-testid="feat-partial">' + partial + '</b></div>' +
+      '<div><span>Missing</span><b style="color:var(--err)" data-testid="feat-no">' + no + '</b></div>' +
+      '<div><span>Score</span><b data-testid="feat-score">' + Math.round(yes / total * 100) + '%</b></div>';
+  }
+
+  function run() {
+    window.TESTBED_FEATURES.runAsync().then(function (r) {
+      report = r;
+      render();
+    });
+  }
+  q('feat-rerun').addEventListener('click', run);
+  q('feat-only-missing').addEventListener('change', render);
+  q('feat-copy').addEventListener('click', function () {
+    var text = JSON.stringify({ userAgent: navigator.userAgent, at: new Date().toISOString(), features: report }, null, 2);
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(function () {
+        q('feat-copy').textContent = 'Copied';
+        setTimeout(function () { q('feat-copy').textContent = 'Copy report as JSON'; }, 1400);
+      }, function () { q('feat-copy').textContent = 'Clipboard denied'; });
+    }
+  });
+  q('feat-download').addEventListener('click', function () {
+    var blob = new Blob([JSON.stringify({ userAgent: navigator.userAgent, features: report }, null, 2)],
+      { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'feature-report.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 3000);
+  });
+
+  q('feat-ua').textContent = JSON.stringify({
+    userAgent: navigator.userAgent,
+    userAgentData: navigator.userAgentData || 'not supported',
+    vendor: navigator.vendor,
+    languages: navigator.languages,
+    hardwareConcurrency: navigator.hardwareConcurrency,
+    deviceMemory: navigator.deviceMemory || 'not exposed',
+    maxTouchPoints: navigator.maxTouchPoints,
+    devicePixelRatio: window.devicePixelRatio,
+    screen: screen.width + '×' + screen.height,
+    secureContext: window.isSecureContext
+  }, null, 2);
+
+  run();
+  document.documentElement.setAttribute('data-page-script', 'ok');
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CSS &amp; rendering — Browser Testbed</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/testbed.css">
+<script src="../assets/js/nav-data.js" defer></script>
+<script src="../assets/js/testbed.js" defer></script>
+<style>
+  .demo-grid { display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:56px; gap:8px; }
+  .demo-grid > div { background:var(--accent-soft); color:var(--accent); border-radius:var(--radius-sm);
+                     display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:600; }
+  .demo-grid .wide { grid-column:span 2; }
+  .demo-grid .tall { grid-row:span 2; }
+
+  .subgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .subgrid > div { display:grid; grid-template-rows:subgrid; grid-row:span 2; gap:4px;
+                   border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px; }
+
+  .cq { container-type:inline-size; border:1px dashed var(--border-strong); border-radius:var(--radius-sm); padding:10px; }
+  .cq__card { background:var(--bg-sunken); border-radius:var(--radius-sm); padding:12px; font-size:13.5px; }
+  .cq__card b::after { content:' — narrow container'; color:var(--fg-faint); font-weight:400; }
+  @container (min-width: 420px) { .cq__card { background:var(--ok-soft); color:var(--ok); }
+                                  .cq__card b::after { content:' — wide container'; } }
+
+  .flexdemo { display:flex; flex-wrap:wrap; gap:8px; align-items:stretch; }
+  .flexdemo > div { flex:1 1 120px; padding:12px; background:var(--bg-sunken); border-radius:var(--radius-sm);
+                    text-align:center; font-size:13px; }
+
+  .scene { perspective:700px; height:150px; display:flex; align-items:center; justify-content:center; }
+  .cube { width:80px; height:80px; position:relative; transform-style:preserve-3d;
+          animation:spin3d 7s linear infinite; }
+  .cube div { position:absolute; inset:0; border:1px solid #fff3; display:flex; align-items:center;
+              justify-content:center; font-size:12px; color:#fff; background:rgba(47,109,246,.75); }
+  @keyframes spin3d { to { transform:rotateX(360deg) rotateY(360deg); } }
+
+  .filters { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; }
+  .filters figure { margin:0; text-align:center; font-size:11px; color:var(--fg-faint); }
+  .filters img { width:100%; height:80px; object-fit:cover; border-radius:var(--radius-sm); display:block; }
+
+  .blend { position:relative; height:130px; border-radius:var(--radius-sm); overflow:hidden;
+           background:url('../assets/media/photo.png') center/cover; }
+  .blend span { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+                font-size:26px; font-weight:800; color:#ffcc00; mix-blend-mode:difference; }
+
+  .glass { position:relative; height:130px; border-radius:var(--radius-sm); overflow:hidden;
+           background:url('../assets/media/wide.png') center/cover; display:flex;
+           align-items:center; justify-content:center; }
+  .glass div { padding:14px 18px; border-radius:var(--radius); background:rgba(255,255,255,.22);
+               backdrop-filter:blur(9px) saturate(1.5); color:#fff; font-weight:600;
+               border:1px solid rgba(255,255,255,.3); }
+
+  .clip { height:110px; background:linear-gradient(135deg,var(--accent),#17864a);
+          clip-path:polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%); }
+  .masked { height:110px; background:linear-gradient(135deg,#c22b2b,#e9b45a);
+            -webkit-mask-image:radial-gradient(circle at 50% 50%, #000 40%, transparent 70%);
+            mask-image:radial-gradient(circle at 50% 50%, #000 40%, transparent 70%); }
+
+  .gradients > div { height:56px; border-radius:var(--radius-sm); margin-bottom:8px; font-size:12px;
+                     color:#fff; display:flex; align-items:center; padding:0 12px; font-weight:600; }
+
+  .scrollbox { height:120px; overflow:auto; border:1px solid var(--border); border-radius:var(--radius-sm);
+               padding:10px; scrollbar-width:thin; }
+  .scrollbox::-webkit-scrollbar { width:10px; }
+  .scrollbox::-webkit-scrollbar-thumb { background:var(--accent); border-radius:5px; }
+  .scrollbox::-webkit-scrollbar-track { background:var(--bg-sunken); }
+
+  .vh-probe { border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px;
+              font-size:12.5px; font-family:var(--mono); }
+  .aspect { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:10px; }
+  .aspect > div { background:var(--accent-soft); color:var(--accent); border-radius:var(--radius-sm);
+                  display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; }
+  .sticky-demo { height:170px; overflow:auto; border:1px solid var(--border); border-radius:var(--radius-sm); }
+  .sticky-demo h4 { position:sticky; top:0; margin:0; padding:7px 12px; background:var(--accent);
+                    color:var(--accent-fg); font-size:12.5px; }
+  .sticky-demo p { margin:0; padding:7px 12px; font-size:13px; color:var(--fg-muted); }
+</style>
+</head>
+<body data-page="rendering">
+<main class="tb-main" id="main">
+
+  <section class="tb-section">
+    <h2>Layout <small>grid, subgrid, container queries, flexbox</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-label" style="margin-bottom:6px">CSS grid with spans</div>
+      <div class="demo-grid" data-testid="rnd-grid">
+        <div class="wide">span 2</div><div>2</div><div class="tall">tall</div>
+        <div>4</div><div>5</div><div>6</div><div class="wide">span 2</div>
+      </div>
+
+      <div class="tb-label" style="margin:16px 0 6px">Subgrid <span class="tb-badge" data-testid="rnd-subgrid-support"></span></div>
+      <div class="subgrid" data-testid="rnd-subgrid">
+        <div><b style="font-size:13px">Card A</b><span style="font-size:12.5px;color:var(--fg-muted)">Short body.</span></div>
+        <div><b style="font-size:13px">Card B</b><span style="font-size:12.5px;color:var(--fg-muted)">A noticeably longer body that pushes this card taller than its siblings.</span></div>
+        <div><b style="font-size:13px">Card C</b><span style="font-size:12.5px;color:var(--fg-muted)">Medium body text.</span></div>
+      </div>
+
+      <div class="tb-label" style="margin:16px 0 6px">Container query — resize the box</div>
+      <div class="cq" style="resize:horizontal;overflow:auto;max-width:100%" data-testid="rnd-container">
+        <div class="cq__card" data-testid="rnd-container-card"><b>Container-relative styling</b></div>
+      </div>
+
+      <div class="tb-label" style="margin:16px 0 6px">Flex wrap</div>
+      <div class="flexdemo" data-testid="rnd-flex">
+        <div>flex 1</div><div>flex 2</div><div>flex 3</div><div>flex 4</div><div>flex 5</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Transforms, filters &amp; compositing</h2>
+    <div class="tb-section__body">
+      <div class="tb-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">3D transforms</div>
+          <div class="scene" data-testid="rnd-3d">
+            <div class="cube">
+              <div style="transform:translateZ(40px)">front</div>
+              <div style="transform:rotateY(180deg) translateZ(40px)">back</div>
+              <div style="transform:rotateY(90deg) translateZ(40px)">right</div>
+              <div style="transform:rotateY(-90deg) translateZ(40px)">left</div>
+              <div style="transform:rotateX(90deg) translateZ(40px)">top</div>
+              <div style="transform:rotateX(-90deg) translateZ(40px)">bottom</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">mix-blend-mode: difference</div>
+          <div class="blend" data-testid="rnd-blend"><span>BLEND</span></div>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">backdrop-filter</div>
+          <div class="glass" data-testid="rnd-backdrop"><div>Frosted glass</div></div>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">clip-path</div>
+          <div class="clip" data-testid="rnd-clip"></div>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">mask-image</div>
+          <div class="masked" data-testid="rnd-mask"></div>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">Gradients</div>
+          <div class="gradients" data-testid="rnd-gradients">
+            <div style="background:linear-gradient(90deg,#2f6df6,#17864a)">linear</div>
+            <div style="background:radial-gradient(circle at 30% 40%,#e9b45a,#c22b2b)">radial</div>
+            <div style="background:conic-gradient(from .25turn,#2f6df6,#17864a,#e9b45a,#2f6df6)">conic</div>
+          </div>
+        </div>
+      </div>
+      <div class="tb-label" style="margin:16px 0 6px">CSS filters</div>
+      <div class="filters" data-testid="rnd-filters"></div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Sticky, scrollbars and overflow</h2>
+    <div class="tb-section__body">
+      <div class="tb-grid" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))">
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">position: sticky headers</div>
+          <div class="sticky-demo" data-testid="rnd-sticky"></div>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">Styled scrollbar</div>
+          <div class="scrollbox" data-testid="rnd-scrollbar"></div>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">Nested scroll containers</div>
+          <div class="scrollbox" data-testid="rnd-nested-scroll">
+            <p style="margin:0 0 8px">Outer scroller.</p>
+            <div class="scrollbox" style="height:60px" data-testid="rnd-inner-scroll">
+              <p style="margin:0">Inner scroller — check scroll chaining and overscroll behaviour.</p>
+              <p style="margin:0">More inner content.</p>
+              <p style="margin:0">Even more inner content.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Units, aspect ratios and safe areas</h2>
+    <div class="tb-section__body">
+      <div class="tb-label" style="margin-bottom:6px">Viewport units</div>
+      <div class="vh-probe" data-testid="rnd-units"></div>
+      <div class="tb-label" style="margin:16px 0 6px">aspect-ratio</div>
+      <div class="aspect" data-testid="rnd-aspect">
+        <div style="aspect-ratio:1/1">1 / 1</div>
+        <div style="aspect-ratio:16/9">16 / 9</div>
+        <div style="aspect-ratio:4/3">4 / 3</div>
+        <div style="aspect-ratio:3/4">3 / 4</div>
+        <div style="aspect-ratio:2.35/1">2.35 / 1</div>
+      </div>
+      <div class="tb-label" style="margin:16px 0 6px">env(safe-area-inset-*)</div>
+      <div class="vh-probe" data-testid="rnd-safearea"
+           style="padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right))"></div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Feature queries, custom properties and colour</h2>
+    <div class="tb-section__body">
+      <div class="tb-grid">
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">@supports results</div>
+          <pre class="tb-out" data-testid="rnd-supports"></pre>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">Custom property playground</div>
+          <div class="tb-stack">
+            <label class="tb-field"><span class="tb-label">--demo-hue</span>
+              <input type="range" min="0" max="360" value="220" data-testid="rnd-hue"></label>
+            <div data-testid="rnd-hue-box" style="height:56px;border-radius:var(--radius-sm);
+                 background:hsl(var(--demo-hue,220) 80% 55%);display:flex;align-items:center;
+                 justify-content:center;color:#fff;font-weight:600">hsl(var(--demo-hue) 80% 55%)</div>
+          </div>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">Colour spaces</div>
+          <div class="tb-stack" data-testid="rnd-colors">
+            <div style="height:36px;border-radius:6px;background:rgb(47 109 246)"></div>
+            <div style="height:36px;border-radius:6px;background:color-mix(in oklab, #2f6df6, #17864a)"></div>
+            <div style="height:36px;border-radius:6px;background:oklch(0.7 0.18 250)"></div>
+            <div style="height:36px;border-radius:6px;background:color(display-p3 0.2 0.6 1)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Preference media queries</h2>
+    <div class="tb-section__body">
+      <pre class="tb-out" data-testid="rnd-prefs"></pre>
+      <p class="tb-hint">Change the OS or browser setting and this table updates live through
+         <code>matchMedia</code> change events.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var q = function (id) { return document.querySelector('[data-testid="' + id + '"]'); };
+
+  q('rnd-subgrid-support').textContent = CSS.supports('grid-template-rows', 'subgrid')
+    ? 'subgrid supported' : 'subgrid NOT supported';
+
+  var filters = ['none', 'blur(3px)', 'brightness(1.6)', 'contrast(2)', 'grayscale(1)',
+                 'hue-rotate(120deg)', 'invert(1)', 'saturate(3)', 'sepia(1)',
+                 'drop-shadow(4px 4px 4px rgba(0,0,0,.6))', 'opacity(.35)'];
+  var fWrap = q('rnd-filters');
+  filters.forEach(function (f) {
+    var fig = document.createElement('figure');
+    fig.setAttribute('data-testid', 'rnd-filter-' + f.split('(')[0]);
+    fig.innerHTML = '<img src="../assets/media/photo.png" alt="Filter sample: ' + f + '"><figcaption></figcaption>';
+    fig.querySelector('img').style.filter = f;
+    fig.querySelector('figcaption').textContent = f;
+    fWrap.appendChild(fig);
+  });
+
+  var sticky = q('rnd-sticky');
+  for (var s = 1; s <= 4; s++) {
+    var h = document.createElement('h4');
+    h.textContent = 'Sticky section ' + s;
+    sticky.appendChild(h);
+    for (var p = 1; p <= 5; p++) {
+      var para = document.createElement('p');
+      para.textContent = 'Row ' + p + ' of section ' + s;
+      sticky.appendChild(para);
+    }
+  }
+  var sb = q('rnd-scrollbar');
+  for (var i = 1; i <= 25; i++) {
+    var d = document.createElement('div');
+    d.style.cssText = 'font-size:13px;color:var(--fg-muted)';
+    d.textContent = 'Scrollable line ' + i;
+    sb.appendChild(d);
+  }
+
+  function units() {
+    var probe = document.createElement('div');
+    probe.style.cssText = 'position:absolute;visibility:hidden;height:100svh';
+    document.body.appendChild(probe);
+    var svh = probe.offsetHeight;
+    probe.style.height = '100lvh'; var lvh = probe.offsetHeight;
+    probe.style.height = '100dvh'; var dvh = probe.offsetHeight;
+    probe.style.height = '100vh'; var vh = probe.offsetHeight;
+    probe.remove();
+    q('rnd-units').textContent =
+      '100vh  = ' + vh + 'px\n100svh = ' + svh + 'px\n100lvh = ' + lvh + 'px\n100dvh = ' + dvh + 'px\n' +
+      'innerHeight = ' + window.innerHeight + 'px\n' +
+      'visualViewport = ' + (window.visualViewport
+        ? Math.round(window.visualViewport.height) + 'px, scale ' + window.visualViewport.scale
+        : 'unsupported');
+  }
+  units();
+  window.addEventListener('resize', units);
+
+  var sa = getComputedStyle(q('rnd-safearea'));
+  q('rnd-safearea').textContent = 'resolved padding-left: ' + sa.paddingLeft +
+    ', padding-right: ' + sa.paddingRight +
+    '\n(0 or the 10px floor unless the display actually has insets)';
+
+  var props = [
+    ['display', 'grid'], ['display', 'flex'], ['grid-template-rows', 'subgrid'],
+    ['container-type', 'inline-size'], ['backdrop-filter', 'blur(2px)'],
+    ['aspect-ratio', '1/1'], ['inset', '0'], ['gap', '1px'],
+    ['color', 'oklch(0.7 0.1 200)'], ['color', 'color(display-p3 1 0 0)'],
+    ['color', 'color-mix(in oklab, red, blue)'], ['height', '100dvh'],
+    ['text-wrap', 'balance'], ['anchor-name', '--a'], ['view-transition-name', 'x'],
+    ['scrollbar-width', 'thin'], ['field-sizing', 'content'], ['position', 'sticky']
+  ];
+  q('rnd-supports').textContent = props.map(function (p) {
+    var ok = false;
+    try { ok = CSS.supports(p[0], p[1]); } catch (e) { /* invalid syntax */ }
+    return (ok ? '✓ ' : '✗ ') + p[0] + ': ' + p[1];
+  }).join('\n');
+
+  var hue = q('rnd-hue'), box = q('rnd-hue-box');
+  hue.addEventListener('input', function () { box.style.setProperty('--demo-hue', hue.value); });
+
+  var queries = [
+    'prefers-color-scheme: dark', 'prefers-reduced-motion: reduce', 'prefers-contrast: more',
+    'prefers-reduced-transparency: reduce', 'forced-colors: active', 'inverted-colors: inverted',
+    'pointer: coarse', 'pointer: fine', 'hover: hover', 'any-pointer: coarse',
+    'display-mode: standalone', 'orientation: portrait', 'update: fast',
+    'dynamic-range: high', 'scripting: enabled', 'max-width: 700px'
+  ];
+  function prefs() {
+    q('rnd-prefs').textContent = queries.map(function (mq) {
+      var m = matchMedia('(' + mq + ')');
+      return (m.matches ? '✓ ' : '· ') + mq;
+    }).join('\n');
+  }
+  queries.forEach(function (mq) {
+    var m = matchMedia('(' + mq + ')');
+    if (m.addEventListener) m.addEventListener('change', prefs);
+  });
+  prefs();
+  document.documentElement.setAttribute('data-page-script', 'ok');
+});
+</script>
+</body>
+</html>

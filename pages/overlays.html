@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Overlays &amp; dialogs — Browser Testbed</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/testbed.css">
+<script src="../assets/js/nav-data.js" defer></script>
+<script src="../assets/js/testbed.js" defer></script>
+<style>
+  dialog { border:1px solid var(--border); border-radius:var(--radius); background:var(--bg-elev);
+           color:var(--fg); padding:0; max-width:min(520px,92vw); box-shadow:var(--shadow); }
+  dialog::backdrop { background:rgba(0,0,0,.45); backdrop-filter:blur(2px); }
+  dialog header, dialog footer { padding:12px 16px; }
+  dialog header { border-bottom:1px solid var(--border); font-weight:600; }
+  dialog .body { padding:16px; }
+  dialog footer { border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end; }
+
+  .toasts { position:fixed; right:16px; top:66px; z-index:80; display:grid; gap:8px; width:min(320px,86vw); }
+  .toast { padding:11px 13px; border-radius:var(--radius-sm); background:var(--bg-elev);
+           border:1px solid var(--border); box-shadow:var(--shadow); font-size:13.5px;
+           animation:toastin .22s ease; }
+  @keyframes toastin { from { opacity:0; transform:translateY(-8px); } }
+
+  .tip { position:relative; display:inline-block; }
+  .tip__bubble { position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
+                 background:var(--fg); color:var(--bg); font-size:12.5px; padding:5px 9px;
+                 border-radius:5px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s; }
+  .tip:hover .tip__bubble, .tip:focus-within .tip__bubble { opacity:1; }
+
+  .menu { position:fixed; z-index:90; min-width:190px; padding:5px; background:var(--bg-elev);
+          border:1px solid var(--border); border-radius:var(--radius-sm); box-shadow:var(--shadow); }
+  .menu[hidden] { display:none; }
+  .menu button { display:block; width:100%; text-align:left; border:0; background:none; font:inherit;
+                 font-size:13.5px; padding:6px 9px; border-radius:4px; cursor:pointer; color:var(--fg); }
+  .menu button:hover, .menu button:focus { background:var(--accent-soft); color:var(--accent); outline:none; }
+
+  .sheet { position:fixed; left:0; right:0; bottom:0; z-index:80; background:var(--bg-elev);
+           border-top:1px solid var(--border); border-radius:var(--radius) var(--radius) 0 0;
+           padding:18px; transform:translateY(102%); transition:transform .25s ease; box-shadow:var(--shadow); }
+  .sheet[data-open="true"] { transform:none; }
+  .sheet__grip { width:42px; height:4px; border-radius:2px; background:var(--border-strong); margin:0 auto 14px; }
+
+  .lightbox { position:fixed; inset:0; z-index:95; background:rgba(0,0,0,.85); display:none;
+              align-items:center; justify-content:center; }
+  .lightbox[data-open="true"] { display:flex; }
+  .lightbox img { max-width:88vw; max-height:82vh; border-radius:var(--radius); }
+
+  [popover] { border:1px solid var(--border); border-radius:var(--radius); background:var(--bg-elev);
+              color:var(--fg); padding:14px; box-shadow:var(--shadow); }
+  .ctx-area { padding:26px; border:1px dashed var(--border-strong); border-radius:var(--radius-sm);
+              text-align:center; color:var(--fg-muted); background:var(--bg-sunken); }
+</style>
+</head>
+<body data-page="overlays">
+<main class="tb-main" id="main">
+
+  <section class="tb-section">
+    <h2>&lt;dialog&gt; <small>top layer, backdrop, Esc-to-close, focus return</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-row">
+        <button class="tb-btn tb-btn--primary" type="button" data-testid="ov-dialog-modal">Modal showModal()</button>
+        <button class="tb-btn" type="button" data-testid="ov-dialog-nonmodal">Non-modal show()</button>
+        <button class="tb-btn" type="button" data-testid="ov-dialog-form">Dialog with a form (method=dialog)</button>
+        <button class="tb-btn" type="button" data-testid="ov-dialog-nested">Nested dialogs</button>
+        <button class="tb-btn" type="button" data-testid="ov-dialog-long">Long, scrollable dialog</button>
+      </div>
+      <pre class="tb-out" data-testid="ov-dialog-out" style="margin-top:12px">No dialog result yet.</pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Native browser prompts <small>alert, confirm, prompt and print</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-row">
+        <button class="tb-btn" type="button" data-testid="ov-alert">alert()</button>
+        <button class="tb-btn" type="button" data-testid="ov-confirm">confirm()</button>
+        <button class="tb-btn" type="button" data-testid="ov-prompt">prompt()</button>
+        <button class="tb-btn" type="button" data-testid="ov-alert-long">alert() with a very long message</button>
+        <button class="tb-btn" type="button" data-testid="ov-print">window.print()</button>
+      </div>
+      <pre class="tb-out" data-testid="ov-native-out" style="margin-top:12px"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Popover API &amp; tooltips</h2>
+    <div class="tb-section__body">
+      <div class="tb-row" style="align-items:center;gap:18px">
+        <button class="tb-btn" type="button" popovertarget="pop-auto" data-testid="ov-popover-auto">Auto popover</button>
+        <button class="tb-btn" type="button" popovertarget="pop-manual" data-testid="ov-popover-manual">Manual popover</button>
+        <span class="tip" tabindex="0" data-testid="ov-tooltip-custom" style="border-bottom:1px dotted var(--fg-faint)">
+          Custom tooltip on hover/focus
+          <span class="tip__bubble">Rendered by the page, not the browser</span>
+        </span>
+        <span title="This is the browser's own title tooltip" data-testid="ov-tooltip-native"
+              style="border-bottom:1px dotted var(--fg-faint)">Native title tooltip</span>
+        <abbr title="HyperText Markup Language" data-testid="ov-abbr">HTML</abbr>
+      </div>
+      <div id="pop-auto" popover="auto" data-testid="ov-popover-auto-panel">
+        <b>Auto popover</b><p style="margin:6px 0 0;font-size:13.5px;color:var(--fg-muted)">Light dismiss:
+        clicking outside or pressing Esc should close it.</p>
+      </div>
+      <div id="pop-manual" popover="manual" data-testid="ov-popover-manual-panel">
+        <b>Manual popover</b><p style="margin:6px 0 8px;font-size:13.5px;color:var(--fg-muted)">Stays until dismissed.</p>
+        <button class="tb-btn tb-btn--sm" type="button" popovertarget="pop-manual" popovertargetaction="hide"
+                data-testid="ov-popover-manual-close">Close</button>
+      </div>
+      <p class="tb-hint" style="margin-top:10px" data-testid="ov-popover-support"></p>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Dropdowns, context menu and toasts</h2>
+    <div class="tb-section__body">
+      <div class="tb-row">
+        <button class="tb-btn" type="button" data-testid="ov-toast-info">Show toast</button>
+        <button class="tb-btn" type="button" data-testid="ov-toast-many">Show five stacked toasts</button>
+        <button class="tb-btn" type="button" data-testid="ov-sheet-open">Bottom sheet</button>
+        <button class="tb-btn" type="button" data-testid="ov-lightbox-open">Lightbox</button>
+      </div>
+      <div class="ctx-area" data-testid="ov-context-area" style="margin-top:14px">
+        Right-click (or long-press) here for a custom context menu.<br>
+        <span style="font-size:12.5px">The browser's own menu is suppressed inside this box only.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Focus management <small>a hand-rolled trap, and where focus lands afterwards</small></h2>
+    <div class="tb-section__body">
+      <p class="tb-note">Open the trapped dialog and press <kbd>Tab</kbd> repeatedly: focus must cycle inside it,
+         and return to the button that opened it when the dialog closes.</p>
+      <div class="tb-row">
+        <button class="tb-btn" type="button" data-testid="ov-trap-open">Open focus-trapped panel</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="ov-focus-report">Report document.activeElement</button>
+      </div>
+      <pre class="tb-out" data-testid="ov-focus-out" style="margin-top:12px"></pre>
+    </div>
+  </section>
+
+  <!-- overlay markup -->
+  <div class="toasts" data-testid="ov-toasts"></div>
+
+  <dialog data-testid="ov-dialog-1">
+    <header>Modal dialog</header>
+    <div class="body">
+      <p style="margin:0 0 10px">Focus should be inside the dialog, the page behind should be inert,
+         and <kbd>Esc</kbd> should close it.</p>
+      <input aria-label="Dialog field" data-testid="ov-dialog-input" placeholder="Focusable field">
+    </div>
+    <footer>
+      <button class="tb-btn" type="button" data-testid="ov-dialog-1-close">Close</button>
+      <button class="tb-btn tb-btn--primary" type="button" data-testid="ov-dialog-1-ok">OK</button>
+    </footer>
+  </dialog>
+
+  <dialog data-testid="ov-dialog-2" style="position:fixed;right:20px;top:80px;margin:0">
+    <header>Non-modal</header>
+    <div class="body" style="font-size:13.5px">No backdrop; the page stays interactive.</div>
+    <footer><button class="tb-btn tb-btn--sm" type="button" data-testid="ov-dialog-2-close">Dismiss</button></footer>
+  </dialog>
+
+  <dialog data-testid="ov-dialog-3">
+    <form method="dialog">
+      <header>Form dialog</header>
+      <div class="body">
+        <div class="tb-field"><label for="dlg-name">Your name</label>
+          <input id="dlg-name" name="name" data-testid="ov-dialog-3-name" required></div>
+      </div>
+      <footer>
+        <button class="tb-btn" value="cancel" data-testid="ov-dialog-3-cancel">Cancel</button>
+        <button class="tb-btn tb-btn--primary" value="confirm" data-testid="ov-dialog-3-confirm">Confirm</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog data-testid="ov-dialog-outer">
+    <header>Outer dialog</header>
+    <div class="body">
+      <p style="margin:0 0 10px">Open a second dialog on top of this one.</p>
+      <button class="tb-btn" type="button" data-testid="ov-dialog-inner-open">Open inner dialog</button>
+    </div>
+    <footer><button class="tb-btn" type="button" data-testid="ov-dialog-outer-close">Close outer</button></footer>
+  </dialog>
+  <dialog data-testid="ov-dialog-inner">
+    <header>Inner dialog</header>
+    <div class="body">Stacked in the top layer above the outer dialog.</div>
+    <footer><button class="tb-btn" type="button" data-testid="ov-dialog-inner-close">Close inner</button></footer>
+  </dialog>
+
+  <dialog data-testid="ov-dialog-scroll">
+    <header>Scrollable dialog</header>
+    <div class="body" style="max-height:50vh;overflow:auto" data-testid="ov-dialog-scroll-body"></div>
+    <footer><button class="tb-btn" type="button" data-testid="ov-dialog-scroll-close">Close</button></footer>
+  </dialog>
+
+  <dialog data-testid="ov-trap-dialog">
+    <header>Focus trap</header>
+    <div class="body tb-stack">
+      <input aria-label="First field" data-testid="ov-trap-first" placeholder="First">
+      <input aria-label="Second field" data-testid="ov-trap-second" placeholder="Second">
+      <a href="#" data-testid="ov-trap-link">A link inside the trap</a>
+    </div>
+    <footer><button class="tb-btn" type="button" data-testid="ov-trap-close">Close</button></footer>
+  </dialog>
+
+  <div class="menu" hidden data-testid="ov-context-menu" role="menu">
+    <button role="menuitem" data-testid="ov-menu-copy">Copy</button>
+    <button role="menuitem" data-testid="ov-menu-paste">Paste</button>
+    <button role="menuitem" data-testid="ov-menu-inspect">Inspect</button>
+    <hr style="border:0;border-top:1px solid var(--border);margin:4px 0">
+    <button role="menuitem" data-testid="ov-menu-delete" style="color:var(--err)">Delete</button>
+  </div>
+
+  <div class="sheet" data-testid="ov-sheet" aria-hidden="true">
+    <div class="sheet__grip"></div>
+    <b>Bottom sheet</b>
+    <p style="color:var(--fg-muted);font-size:13.5px">Drag the grip or press Esc to dismiss.</p>
+    <button class="tb-btn" type="button" data-testid="ov-sheet-close">Close</button>
+  </div>
+
+  <div class="lightbox" data-testid="ov-lightbox">
+    <img src="../assets/media/photo.png" alt="Enlarged sample" data-testid="ov-lightbox-image">
+  </div>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var q = function (id) { return document.querySelector('[data-testid="' + id + '"]'); };
+  var dOut = q('ov-dialog-out'), nOut = q('ov-native-out');
+
+  function openDialog(el, modal) {
+    if (typeof el.showModal !== 'function') { dOut.textContent = '<dialog> is not supported in this browser.'; return; }
+    modal ? el.showModal() : el.show();
+    dOut.textContent = 'Opened ' + el.getAttribute('data-testid') + (modal ? ' as modal.' : ' as non-modal.');
+  }
+  q('ov-dialog-modal').addEventListener('click', function () { openDialog(q('ov-dialog-1'), true); });
+  q('ov-dialog-nonmodal').addEventListener('click', function () { openDialog(q('ov-dialog-2'), false); });
+  q('ov-dialog-form').addEventListener('click', function () { openDialog(q('ov-dialog-3'), true); });
+  q('ov-dialog-nested').addEventListener('click', function () { openDialog(q('ov-dialog-outer'), true); });
+  q('ov-dialog-long').addEventListener('click', function () {
+    var body = q('ov-dialog-scroll-body');
+    if (!body.childNodes.length) {
+      for (var i = 1; i <= 40; i++) {
+        var p = document.createElement('p');
+        p.style.cssText = 'margin:0 0 10px;color:var(--fg-muted)';
+        p.textContent = 'Paragraph ' + i + ' — the page behind must not scroll while this is open.';
+        body.appendChild(p);
+      }
+    }
+    openDialog(q('ov-dialog-scroll'), true);
+  });
+  q('ov-dialog-1-close').addEventListener('click', function () { q('ov-dialog-1').close('closed'); });
+  q('ov-dialog-1-ok').addEventListener('click', function () { q('ov-dialog-1').close('ok'); });
+  q('ov-dialog-2-close').addEventListener('click', function () { q('ov-dialog-2').close(); });
+  q('ov-dialog-inner-open').addEventListener('click', function () { openDialog(q('ov-dialog-inner'), true); });
+  q('ov-dialog-inner-close').addEventListener('click', function () { q('ov-dialog-inner').close(); });
+  q('ov-dialog-outer-close').addEventListener('click', function () { q('ov-dialog-outer').close(); });
+  q('ov-dialog-scroll-close').addEventListener('click', function () { q('ov-dialog-scroll').close(); });
+  document.querySelectorAll('dialog').forEach(function (d) {
+    d.addEventListener('close', function () {
+      dOut.textContent = d.getAttribute('data-testid') + ' closed, returnValue = ' +
+        JSON.stringify(d.returnValue) + '\nfocus returned to: ' +
+        (document.activeElement.getAttribute('data-testid') || document.activeElement.tagName);
+    });
+    d.addEventListener('cancel', function () {
+      dOut.textContent = d.getAttribute('data-testid') + ' cancelled (Esc).';
+    });
+  });
+
+  /* native prompts */
+  q('ov-alert').addEventListener('click', function () {
+    alert('A plain alert. The page is blocked until it is dismissed.');
+    nOut.textContent = 'alert() returned.';
+  });
+  q('ov-alert-long').addEventListener('click', function () {
+    alert(('This alert holds a deliberately long body so wrapping, scrolling and the maximum ' +
+      'dialog size can be checked. ').repeat(12));
+    nOut.textContent = 'long alert() returned.';
+  });
+  q('ov-confirm').addEventListener('click', function () {
+    nOut.textContent = 'confirm() → ' + confirm('Do you want to continue?');
+  });
+  q('ov-prompt').addEventListener('click', function () {
+    nOut.textContent = 'prompt() → ' + JSON.stringify(prompt('Type anything:', 'default value'));
+  });
+  q('ov-print').addEventListener('click', function () { window.print(); });
+
+  /* popover support note */
+  q('ov-popover-support').textContent = HTMLElement.prototype.hasOwnProperty('popover')
+    ? 'Popover API: supported.'
+    : 'Popover API: not supported — the buttons above will do nothing.';
+
+  /* toasts */
+  var toasts = q('ov-toasts'), tn = 0;
+  function toast(msg, ms) {
+    tn++;
+    var t = document.createElement('div');
+    t.className = 'toast';
+    t.setAttribute('role', 'status');
+    t.setAttribute('data-testid', 'ov-toast-' + tn);
+    t.textContent = msg;
+    toasts.appendChild(t);
+    setTimeout(function () { t.remove(); }, ms || 3200);
+  }
+  q('ov-toast-info').addEventListener('click', function () { toast('Saved at ' + new Date().toLocaleTimeString()); });
+  q('ov-toast-many').addEventListener('click', function () {
+    for (var i = 1; i <= 5; i++) (function (i) { setTimeout(function () { toast('Stacked toast ' + i); }, i * 160); })(i);
+  });
+
+  /* bottom sheet */
+  var sheet = q('ov-sheet');
+  function setSheet(open) { sheet.setAttribute('data-open', String(open)); sheet.setAttribute('aria-hidden', String(!open)); }
+  q('ov-sheet-open').addEventListener('click', function () { setSheet(true); });
+  q('ov-sheet-close').addEventListener('click', function () { setSheet(false); });
+
+  /* lightbox */
+  var lb = q('ov-lightbox');
+  q('ov-lightbox-open').addEventListener('click', function () { lb.setAttribute('data-open', 'true'); });
+  lb.addEventListener('click', function () { lb.setAttribute('data-open', 'false'); });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    setSheet(false);
+    lb.setAttribute('data-open', 'false');
+    menu.hidden = true;
+  });
+
+  /* context menu */
+  var menu = q('ov-context-menu'), area = q('ov-context-area');
+  area.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+    menu.hidden = false;
+    var x = Math.min(e.clientX, window.innerWidth - 200);
+    var y = Math.min(e.clientY, window.innerHeight - 170);
+    menu.style.left = x + 'px';
+    menu.style.top = y + 'px';
+    menu.querySelector('button').focus();
+  });
+  document.addEventListener('click', function (e) { if (!menu.contains(e.target)) menu.hidden = true; });
+  menu.querySelectorAll('button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      menu.hidden = true;
+      toast('Context menu action: ' + b.textContent);
+    });
+  });
+
+  /* focus trap */
+  var trap = q('ov-trap-dialog');
+  function focusables() {
+    return Array.prototype.slice.call(trap.querySelectorAll('input, button, a[href]'))
+      .filter(function (n) { return !n.disabled; });
+  }
+  q('ov-trap-open').addEventListener('click', function () {
+    openDialog(trap, true);
+    focusables()[0].focus();
+  });
+  q('ov-trap-close').addEventListener('click', function () { trap.close(); });
+  trap.addEventListener('keydown', function (e) {
+    if (e.key !== 'Tab') return;
+    var f = focusables();
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
+    else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
+  });
+  q('ov-focus-report').addEventListener('click', function () {
+    var a = document.activeElement;
+    q('ov-focus-out').textContent = JSON.stringify({
+      tag: a.tagName, testid: a.getAttribute('data-testid'), id: a.id,
+      openDialogs: Array.prototype.filter.call(document.querySelectorAll('dialog'), function (d) { return d.open; })
+        .map(function (d) { return d.getAttribute('data-testid'); })
+    }, null, 2);
+  });
+  document.documentElement.setAttribute('data-page-script', 'ok');
+});
+</script>
+</body>
+</html>

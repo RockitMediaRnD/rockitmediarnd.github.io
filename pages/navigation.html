@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Navigation &amp; history — Browser Testbed</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/testbed.css">
+<script src="../assets/js/nav-data.js" defer></script>
+<script src="../assets/js/testbed.js" defer></script>
+<style>
+  iframe { width:100%; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg-sunken); }
+  .anchor-target { padding:40px 14px; margin:10px 0; border-radius:var(--radius-sm); background:var(--bg-sunken);
+                   border:1px dashed var(--border-strong); }
+  :target { outline:2px solid var(--accent); background:var(--accent-soft); }
+</style>
+</head>
+<body data-page="navigation">
+<main class="tb-main" id="main">
+
+  <section class="tb-section">
+    <h2>Plain links</h2>
+    <div class="tb-section__body">
+      <div class="tb-row">
+        <a class="tb-btn" href="./forms-text.html" data-testid="nav-link-internal">Same-origin page</a>
+        <a class="tb-btn" href="../index.html" data-testid="nav-link-home">Site root</a>
+        <a class="tb-btn" href="./this-page-does-not-exist.html" data-testid="nav-link-404">Missing page (404)</a>
+        <a class="tb-btn" href="./forms-text.html" target="_blank" rel="noopener" data-testid="nav-link-blank">New tab (rel=noopener)</a>
+        <a class="tb-btn" href="./forms-text.html" target="_blank" data-testid="nav-link-blank-opener">New tab (no rel — window.opener is set)</a>
+        <a class="tb-btn" href="https://example.com/" target="_blank" rel="noopener noreferrer" data-testid="nav-link-external">External site</a>
+        <a class="tb-btn" href="../assets/media/sample.pdf" data-testid="nav-link-pdf">PDF (inline viewer)</a>
+        <a class="tb-btn" href="../assets/media/sample.csv" download data-testid="nav-link-download">Download instead of navigate</a>
+      </div>
+      <div class="tb-row" style="margin-top:10px">
+        <a class="tb-btn tb-btn--sm" href="mailto:test@example.com?subject=Testbed" data-testid="nav-link-mailto">mailto:</a>
+        <a class="tb-btn tb-btn--sm" href="tel:+380440000000" data-testid="nav-link-tel">tel:</a>
+        <a class="tb-btn tb-btn--sm" href="sms:+380440000000?body=hi" data-testid="nav-link-sms">sms:</a>
+        <a class="tb-btn tb-btn--sm" href="testbed-scheme://open/thing" data-testid="nav-link-custom">Unknown scheme</a>
+        <a class="tb-btn tb-btn--sm" href="javascript:void(0)" data-testid="nav-link-javascript">javascript: URL</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Fragments &amp; scrolling</h2>
+    <div class="tb-section__body">
+      <div class="tb-row">
+        <a class="tb-btn tb-btn--sm" href="#anchor-a" data-testid="nav-anchor-a">Jump to A</a>
+        <a class="tb-btn tb-btn--sm" href="#anchor-b" data-testid="nav-anchor-b">Jump to B</a>
+        <a class="tb-btn tb-btn--sm" href="#anchor-c" data-testid="nav-anchor-c">Jump to C (smooth)</a>
+        <a class="tb-btn tb-btn--sm" href="#" data-testid="nav-anchor-top">Empty fragment</a>
+        <a class="tb-btn tb-btn--sm" href="./forms-text.html#autocompletes" data-testid="nav-anchor-cross">Fragment on another page</a>
+      </div>
+      <div id="anchor-a" class="anchor-target" data-testid="nav-target-a"><b>Anchor A</b> — <code>:target</code> styling should apply.</div>
+      <div id="anchor-b" class="anchor-target" data-testid="nav-target-b"><b>Anchor B</b></div>
+      <div id="anchor-c" class="anchor-target" style="scroll-behavior:smooth" data-testid="nav-target-c"><b>Anchor C</b></div>
+      <p class="tb-hint">Current fragment: <code data-testid="nav-hash-out">(none)</code></p>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>History API <small>pushState, replaceState, back and forward without a page load</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-row">
+        <button class="tb-btn" type="button" data-testid="nav-push">pushState</button>
+        <button class="tb-btn" type="button" data-testid="nav-replace">replaceState</button>
+        <button class="tb-btn" type="button" data-testid="nav-back">history.back()</button>
+        <button class="tb-btn" type="button" data-testid="nav-forward">history.forward()</button>
+        <button class="tb-btn" type="button" data-testid="nav-go-2">history.go(-2)</button>
+        <button class="tb-btn" type="button" data-testid="nav-reload">location.reload()</button>
+      </div>
+      <pre class="tb-out" data-testid="nav-history-out" style="margin-top:12px"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Client-side routers</h2>
+    <div class="tb-section__body">
+      <div class="tb-grid">
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">Hash router</div>
+          <div class="tb-row">
+            <a class="tb-btn tb-btn--sm" href="#/inbox" data-testid="nav-hash-inbox">#/inbox</a>
+            <a class="tb-btn tb-btn--sm" href="#/settings" data-testid="nav-hash-settings">#/settings</a>
+            <a class="tb-btn tb-btn--sm" href="#/profile/42" data-testid="nav-hash-profile">#/profile/42</a>
+          </div>
+          <div class="tb-out" data-testid="nav-hash-view" style="margin-top:10px"></div>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">History router (real URLs, no reload)</div>
+          <div class="tb-row">
+            <button class="tb-btn tb-btn--sm" type="button" data-route="/inbox" data-testid="nav-route-inbox">/inbox</button>
+            <button class="tb-btn tb-btn--sm" type="button" data-route="/settings" data-testid="nav-route-settings">/settings</button>
+            <button class="tb-btn tb-btn--sm" type="button" data-route="/profile/42" data-testid="nav-route-profile">/profile/42</button>
+          </div>
+          <div class="tb-out" data-testid="nav-route-view" style="margin-top:10px"></div>
+          <p class="tb-hint">These change the path with <code>pushState</code>. Reloading such a URL on a static
+             host lands on the 404 document — which is itself worth seeing.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Programmatic navigation &amp; redirects</h2>
+    <div class="tb-section__body">
+      <div class="tb-row">
+        <button class="tb-btn" type="button" data-testid="nav-assign">location.assign()</button>
+        <button class="tb-btn" type="button" data-testid="nav-replace-loc">location.replace() (no history entry)</button>
+        <button class="tb-btn" type="button" data-testid="nav-open-popup">window.open() sized popup</button>
+        <button class="tb-btn" type="button" data-testid="nav-open-blank">window.open() plain tab</button>
+        <button class="tb-btn" type="button" data-testid="nav-close-popup">Close the popup</button>
+        <button class="tb-btn" type="button" data-testid="nav-post-message">postMessage to popup</button>
+      </div>
+      <pre class="tb-out" data-testid="nav-popup-out" style="margin-top:12px">No popup opened yet.</pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>beforeunload <small>the browser's own “leave site?” prompt</small></h2>
+    <div class="tb-section__body">
+      <label class="tb-check">
+        <input type="checkbox" data-testid="nav-beforeunload-toggle">
+        <span>Arm <code>beforeunload</code> — the next attempt to leave, reload or close should be confirmed.</span>
+      </label>
+      <p class="tb-hint">Most browsers only honour this after the page has been interacted with.</p>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Frames <small>same-origin, sandboxed, nested and cross-origin</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">Same-origin, navigable</div>
+          <iframe data-testid="nav-iframe-same" src="./nav-step-1.html" height="230" title="Same-origin frame"></iframe>
+          <div class="tb-row" style="margin-top:8px">
+            <button class="tb-btn tb-btn--sm" type="button" data-testid="nav-iframe-back">Frame back</button>
+            <button class="tb-btn tb-btn--sm" type="button" data-testid="nav-iframe-reload">Frame reload</button>
+            <button class="tb-btn tb-btn--sm" type="button" data-testid="nav-iframe-inspect">Read frame DOM</button>
+          </div>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">sandbox="" (scripts blocked)</div>
+          <iframe data-testid="nav-iframe-sandbox" sandbox srcdoc="&lt;body style='font:14px system-ui;padding:12px'&gt;Sandboxed with no allow-* tokens. &lt;button onclick='alert(1)'&gt;Script should not run&lt;/button&gt;&lt;script&gt;document.body.style.background='#fdd'&lt;/script&gt;&lt;/body&gt;" height="150" title="Sandboxed frame"></iframe>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">sandbox="allow-scripts"</div>
+          <iframe data-testid="nav-iframe-sandbox-scripts" sandbox="allow-scripts" srcdoc="&lt;body style='font:14px system-ui;padding:12px'&gt;Scripts allowed, origin opaque.&lt;pre id='o'&gt;&lt;/pre&gt;&lt;script&gt;document.getElementById('o').textContent='origin: '+location.origin+String.fromCharCode(10)+'top access: '+(function(){try{return !!parent.document}catch(e){return e.name}})()&lt;/script&gt;&lt;/body&gt;" height="150" title="Sandboxed frame with scripts"></iframe>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">Nested frame (a frame inside a frame)</div>
+          <iframe data-testid="nav-iframe-nested" srcdoc="&lt;body style='margin:0'&gt;&lt;iframe style='width:100%;height:120px;border:0' src='./forms-text.html'&gt;&lt;/iframe&gt;&lt;/body&gt;" height="150" title="Nested frame"></iframe>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">Cross-origin (likely refused by the remote site)</div>
+          <iframe data-testid="nav-iframe-cross" src="https://example.com/" height="150" title="Cross-origin frame" loading="lazy"></iframe>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">PDF in a frame</div>
+          <iframe data-testid="nav-iframe-pdf" src="../assets/media/sample.pdf" height="150" title="PDF frame"></iframe>
+        </div>
+      </div>
+      <pre class="tb-out" data-testid="nav-iframe-out" style="margin-top:12px"></pre>
+    </div>
+  </section>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var q = function (id) { return document.querySelector('[data-testid="' + id + '"]'); };
+  var basePath = location.pathname;
+
+  /* ---------- history ---------- */
+  function hist() {
+    q('nav-history-out').textContent = JSON.stringify({
+      href: location.href, pathname: location.pathname, search: location.search, hash: location.hash,
+      historyLength: history.length, state: history.state,
+      referrer: document.referrer || '(none)',
+      navigationType: (performance.getEntriesByType &&
+        (performance.getEntriesByType('navigation')[0] || {}).type) || 'unknown'
+    }, null, 2);
+    q('nav-hash-out').textContent = location.hash || '(none)';
+  }
+  var n = 0;
+  q('nav-push').addEventListener('click', function () {
+    n++; history.pushState({ n: n, at: Date.now() }, '', basePath + '?push=' + n); hist();
+  });
+  q('nav-replace').addEventListener('click', function () {
+    history.replaceState({ replaced: true }, '', basePath + '?replaced=1'); hist();
+  });
+  q('nav-back').addEventListener('click', function () { history.back(); });
+  q('nav-forward').addEventListener('click', function () { history.forward(); });
+  q('nav-go-2').addEventListener('click', function () { history.go(-2); });
+  q('nav-reload').addEventListener('click', function () { location.reload(); });
+  window.addEventListener('popstate', function (e) {
+    hist();
+    route();
+  });
+  window.addEventListener('hashchange', function () { hist(); hashRoute(); });
+  hist();
+
+  /* ---------- routers ---------- */
+  function hashRoute() {
+    var r = location.hash.replace(/^#/, '') || '(no route)';
+    q('nav-hash-view').textContent = 'hash route: ' + r;
+  }
+  hashRoute();
+
+  function route() {
+    var m = location.pathname.match(/\/(inbox|settings|profile)(\/\d+)?$/);
+    q('nav-route-view').textContent = m
+      ? 'history route: /' + m[1] + (m[2] || '')
+      : 'history route: (document path, no virtual route)';
+  }
+  document.querySelectorAll('[data-route]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      history.pushState({ route: b.dataset.route }, '', basePath.replace(/\/[^/]*$/, '') + b.dataset.route);
+      route(); hist();
+    });
+  });
+  route();
+
+  /* ---------- programmatic navigation ---------- */
+  var popup = null, pOut = q('nav-popup-out');
+  q('nav-assign').addEventListener('click', function () { location.assign('./forms-text.html'); });
+  q('nav-replace-loc').addEventListener('click', function () { location.replace('./forms-selection.html'); });
+  q('nav-open-popup').addEventListener('click', function () {
+    popup = window.open('./nav-step-1.html', 'testbed-popup',
+      'width=520,height=420,left=120,top=120,menubar=no,toolbar=no,location=yes,resizable=yes');
+    pOut.textContent = popup ? 'Popup opened (named "testbed-popup").' : 'window.open() returned null — popup blocked.';
+  });
+  q('nav-open-blank').addEventListener('click', function () {
+    popup = window.open('./nav-step-1.html', '_blank');
+    pOut.textContent = popup ? 'Opened in a new tab.' : 'window.open() returned null — popup blocked.';
+  });
+  q('nav-close-popup').addEventListener('click', function () {
+    if (popup && !popup.closed) { popup.close(); pOut.textContent = 'Popup closed by the opener.'; }
+    else pOut.textContent = 'No open popup to close.';
+  });
+  q('nav-post-message').addEventListener('click', function () {
+    if (!popup || popup.closed) { pOut.textContent = 'Open a popup first.'; return; }
+    popup.postMessage({ from: 'testbed', at: Date.now() }, location.origin);
+    pOut.textContent = 'postMessage sent to the popup.';
+  });
+  window.addEventListener('message', function (e) {
+    if (e.origin !== location.origin) return;
+    pOut.textContent = 'message received: ' + JSON.stringify(e.data);
+  });
+
+  /* ---------- beforeunload ---------- */
+  var armed = false;
+  q('nav-beforeunload-toggle').addEventListener('change', function () { armed = this.checked; });
+  window.addEventListener('beforeunload', function (e) {
+    if (!armed) return;
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+  });
+
+  /* ---------- frames ---------- */
+  var frame = q('nav-iframe-same'), fOut = q('nav-iframe-out');
+  q('nav-iframe-back').addEventListener('click', function () {
+    try { frame.contentWindow.history.back(); } catch (e) { fOut.textContent = e.name + ': ' + e.message; }
+  });
+  q('nav-iframe-reload').addEventListener('click', function () {
+    try { frame.contentWindow.location.reload(); } catch (e) { fOut.textContent = e.name + ': ' + e.message; }
+  });
+  q('nav-iframe-inspect').addEventListener('click', function () {
+    var lines = [];
+    document.querySelectorAll('iframe').forEach(function (f) {
+      var id = f.getAttribute('data-testid');
+      try {
+        var d = f.contentDocument;
+        lines.push(id + ': ' + (d ? 'readable, title=' + JSON.stringify(d.title || '(none)') +
+          ', url=' + d.location.href : 'no contentDocument'));
+      } catch (e) {
+        lines.push(id + ': blocked — ' + e.name);
+      }
+    });
+    fOut.textContent = lines.join('\n');
+  });
+  q('nav-iframe-cross').addEventListener('error', function () {
+    fOut.textContent = 'The cross-origin frame reported an error (X-Frame-Options / CSP).';
+  });
+  document.documentElement.setAttribute('data-page-script', 'ok');
+});
+</script>
+</body>
+</html>

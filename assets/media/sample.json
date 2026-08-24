@@ -1,0 +1,5 @@
+{
+  "name": "browser-testbed",
+  "items": [1, 2, 3],
+  "nested": { "unicode": "Привіт 👋 日本語" }
+}

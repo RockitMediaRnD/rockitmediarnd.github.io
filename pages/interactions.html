@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pointer &amp; keyboard — Browser Testbed</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/testbed.css">
+<script src="../assets/js/nav-data.js" defer></script>
+<script src="../assets/js/testbed.js" defer></script>
+<style>
+  .dnd { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .dnd__col { min-height:150px; padding:10px; border:1px dashed var(--border-strong);
+              border-radius:var(--radius-sm); background:var(--bg-sunken); }
+  .dnd__col[data-over="true"] { border-color:var(--accent); background:var(--accent-soft); }
+  .dnd__item { padding:8px 11px; margin-bottom:7px; background:var(--bg-elev); border:1px solid var(--border);
+               border-radius:var(--radius-sm); font-size:13.5px; cursor:grab; }
+  .dnd__item[data-dragging="true"] { opacity:.4; }
+
+  .sortable li { list-style:none; padding:9px 12px; margin:0 0 6px; background:var(--bg-elev);
+                 border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13.5px;
+                 touch-action:none; cursor:grab; user-select:none; }
+  .sortable { padding:0; margin:0; }
+  .sortable li[data-active="true"] { border-color:var(--accent); box-shadow:var(--shadow); }
+
+  .resizer { position:relative; width:240px; height:140px; background:var(--accent-soft);
+             border:1px solid var(--accent); border-radius:var(--radius-sm); overflow:hidden; }
+  .resizer__handle { position:absolute; right:0; bottom:0; width:16px; height:16px;
+                     background:var(--accent); cursor:nwse-resize; }
+  .resize-css { resize:both; overflow:auto; min-width:160px; min-height:90px; padding:10px;
+                border:1px solid var(--border-strong); border-radius:var(--radius-sm); background:var(--bg-elev); }
+
+  .gesture { height:170px; border-radius:var(--radius-sm); border:1px solid var(--border);
+             background:var(--bg-sunken); display:flex; align-items:center; justify-content:center;
+             text-align:center; color:var(--fg-muted); font-size:13.5px; touch-action:none; user-select:none; }
+  .zoomer { overflow:hidden; border:1px solid var(--border); border-radius:var(--radius-sm); height:200px; touch-action:none; }
+  .zoomer img { transform-origin:0 0; width:100%; display:block; }
+
+  .snap { display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:8px; }
+  .snap > div { flex:none; width:70%; height:110px; scroll-snap-align:center; border-radius:var(--radius-sm);
+                background:linear-gradient(135deg,var(--accent),#17864a); color:#fff; display:flex;
+                align-items:center; justify-content:center; font-weight:600; }
+
+  .anim-box { width:70px; height:70px; border-radius:var(--radius-sm); background:var(--accent); }
+  .anim-css { transition:transform .5s cubic-bezier(.2,.8,.2,1), background-color .5s; }
+  .anim-css[data-on="true"] { transform:translateX(180px) rotate(45deg) scale(1.2); background:var(--ok); }
+  @keyframes pulse { 50% { transform:scale(1.35); opacity:.6; } }
+  .anim-key { animation:pulse 1.4s ease-in-out infinite; }
+
+  .observe { height:110px; border:1px solid var(--border); border-radius:var(--radius-sm);
+             display:flex; align-items:center; justify-content:center; background:var(--bg-sunken); }
+  .observe[data-visible="true"] { background:var(--ok-soft); color:var(--ok); }
+</style>
+</head>
+<body data-page="interactions">
+<main class="tb-main" id="main">
+
+  <section class="tb-section">
+    <h2>HTML5 drag and drop <small>dataTransfer, drag images, drop effects</small></h2>
+    <div class="tb-section__body">
+      <div class="dnd">
+        <div class="dnd__col" data-testid="int-dnd-source" data-col="a">
+          <b style="font-size:12px;color:var(--fg-faint)">SOURCE</b>
+          <div class="dnd__item" draggable="true" data-testid="int-dnd-item-1">Draggable item 1</div>
+          <div class="dnd__item" draggable="true" data-testid="int-dnd-item-2">Draggable item 2</div>
+          <div class="dnd__item" draggable="true" data-testid="int-dnd-item-3">Draggable item 3</div>
+        </div>
+        <div class="dnd__col" data-testid="int-dnd-target" data-col="b">
+          <b style="font-size:12px;color:var(--fg-faint)">TARGET — drop here, or drop text from anywhere</b>
+        </div>
+      </div>
+      <pre class="tb-out" data-testid="int-dnd-out" style="margin-top:12px">No drag yet.</pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Pointer-based sorting <small>works with mouse, touch and pen through Pointer Events</small></h2>
+    <div class="tb-section__body">
+      <ul class="sortable" data-testid="int-sortable">
+        <li data-testid="int-sort-1">1 — press and drag to reorder</li>
+        <li data-testid="int-sort-2">2 — pointer capture keeps events flowing</li>
+        <li data-testid="int-sort-3">3 — touch-action: none stops scrolling</li>
+        <li data-testid="int-sort-4">4 — no HTML5 drag involved</li>
+        <li data-testid="int-sort-5">5 — order is reported below</li>
+      </ul>
+      <pre class="tb-out" data-testid="int-sort-out" style="margin-top:10px"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Resizing</h2>
+    <div class="tb-section__body">
+      <div class="tb-row" style="align-items:flex-start;gap:20px">
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">Custom handle (pointer events)</div>
+          <div class="resizer" data-testid="int-resizer">
+            <span style="position:absolute;left:10px;top:10px;font-size:12px" data-testid="int-resizer-size">240 × 140</span>
+            <div class="resizer__handle" data-testid="int-resizer-handle"></div>
+          </div>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">CSS resize: both</div>
+          <div class="resize-css" data-testid="int-resize-css">Drag my bottom-right corner.</div>
+        </div>
+        <div>
+          <div class="tb-label" style="margin-bottom:6px">ResizeObserver readout</div>
+          <pre class="tb-out" data-testid="int-resize-out" style="min-width:200px"></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Gestures <small>swipe, long-press, double-tap and pinch-zoom</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+        <div>
+          <div class="gesture" data-testid="int-gesture-area">
+            Swipe, long-press or double-tap in this box
+          </div>
+          <pre class="tb-out" data-testid="int-gesture-out" style="margin-top:8px">No gesture yet.</pre>
+        </div>
+        <div>
+          <div class="zoomer" data-testid="int-zoomer">
+            <img src="../assets/media/photo.png" alt="Pinch to zoom" data-testid="int-zoom-image">
+          </div>
+          <p class="tb-hint">Pinch (or Ctrl+wheel) to zoom, drag to pan. Scale:
+             <b data-testid="int-zoom-scale">1.00</b></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Keyboard <small>shortcuts, key reporting, focus order and access keys</small></h2>
+    <div class="tb-section__body">
+      <p class="tb-note">Try <kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>, <kbd>Shift</kbd>+<kbd>?</kbd>,
+         <kbd>Alt</kbd>+<kbd>1</kbd>, arrow keys, <kbd>Esc</kbd>, and the access key
+         <kbd>Alt/Ctrl+Opt</kbd>+<kbd>B</kbd>.</p>
+      <div class="tb-row" style="margin-bottom:10px">
+        <button class="tb-btn" type="button" accesskey="b" data-testid="int-accesskey">Access key “b”</button>
+        <input aria-label="Key capture field" data-testid="int-key-field" placeholder="Type here to capture keys" style="max-width:260px">
+      </div>
+      <pre class="tb-out" data-testid="int-key-out">No key events yet.</pre>
+      <div class="tb-row" style="margin-top:14px">
+        <span class="tb-label">Tab order:</span>
+        <button class="tb-btn tb-btn--sm" type="button" tabindex="3" data-testid="int-tab-3">tabindex 3</button>
+        <button class="tb-btn tb-btn--sm" type="button" tabindex="1" data-testid="int-tab-1">tabindex 1</button>
+        <button class="tb-btn tb-btn--sm" type="button" tabindex="2" data-testid="int-tab-2">tabindex 2</button>
+        <button class="tb-btn tb-btn--sm" type="button" tabindex="0" data-testid="int-tab-0">tabindex 0</button>
+        <button class="tb-btn tb-btn--sm" type="button" tabindex="-1" data-testid="int-tab-minus">tabindex -1 (script only)</button>
+        <div tabindex="0" role="button" data-testid="int-tab-div"
+             style="padding:5px 10px;border:1px solid var(--border-strong);border-radius:5px;font-size:13px">focusable div</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Clipboard &amp; selection</h2>
+    <div class="tb-section__body">
+      <div class="tb-row" style="margin-bottom:10px">
+        <button class="tb-btn" type="button" data-testid="int-copy">Copy text (Clipboard API)</button>
+        <button class="tb-btn" type="button" data-testid="int-copy-exec">Copy via execCommand</button>
+        <button class="tb-btn" type="button" data-testid="int-read">Read clipboard</button>
+        <button class="tb-btn" type="button" data-testid="int-copy-image">Copy an image</button>
+        <button class="tb-btn" type="button" data-testid="int-select-para">Select the paragraph</button>
+      </div>
+      <p data-testid="int-selectable" style="padding:10px;background:var(--bg-sunken);border-radius:var(--radius-sm)">
+        Select part of this sentence — the selection range, its text and its bounding rectangle are reported below.
+        Спробуйте також виділити кирилицю та 絵文字 🎯.
+      </p>
+      <textarea rows="2" data-testid="int-paste-area" placeholder="Paste here (Cmd/Ctrl+V)" style="margin-top:8px"></textarea>
+      <pre class="tb-out" data-testid="int-clip-out" style="margin-top:10px"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Scrolling &amp; observers</h2>
+    <div class="tb-section__body">
+      <div class="tb-label" style="margin-bottom:6px">scroll-snap carousel</div>
+      <div class="snap" data-testid="int-snap">
+        <div data-testid="int-snap-1">Slide 1</div><div data-testid="int-snap-2">Slide 2</div>
+        <div data-testid="int-snap-3">Slide 3</div><div data-testid="int-snap-4">Slide 4</div>
+      </div>
+      <div class="tb-row" style="margin:12px 0">
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="int-scroll-smooth">scrollTo smooth</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="int-scroll-into-view">scrollIntoView</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="int-scroll-lock">Toggle body scroll lock</button>
+      </div>
+      <div class="tb-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+        <div class="observe" data-testid="int-observe-1">IntersectionObserver target 1</div>
+        <div class="observe" data-testid="int-observe-2">IntersectionObserver target 2</div>
+        <div class="observe" data-testid="int-observe-3">IntersectionObserver target 3</div>
+      </div>
+      <pre class="tb-out" data-testid="int-scroll-out" style="margin-top:10px"></pre>
+    </div>
+  </section>
+
+  <section class="tb-section">
+    <h2>Animations <small>CSS transitions, keyframes, Web Animations API and view transitions</small></h2>
+    <div class="tb-section__body">
+      <div class="tb-row" style="align-items:center;gap:26px">
+        <div>
+          <div class="anim-box anim-css" data-testid="int-anim-css"></div>
+          <p class="tb-hint">CSS transition</p>
+        </div>
+        <div>
+          <div class="anim-box anim-key" data-testid="int-anim-keyframes"></div>
+          <p class="tb-hint">@keyframes loop</p>
+        </div>
+        <div>
+          <div class="anim-box" data-testid="int-anim-waapi" style="background:var(--warn)"></div>
+          <p class="tb-hint">Web Animations API</p>
+        </div>
+      </div>
+      <div class="tb-row" style="margin-top:12px">
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="int-anim-toggle">Toggle transition</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="int-anim-play">animate() play</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="int-anim-pause">Pause / resume</button>
+        <button class="tb-btn tb-btn--sm" type="button" data-testid="int-anim-viewtransition">startViewTransition</button>
+      </div>
+      <pre class="tb-out" data-testid="int-anim-out" style="margin-top:10px"></pre>
+    </div>
+  </section>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var q = function (id) { return document.querySelector('[data-testid="' + id + '"]'); };
+
+  /* ---------------- HTML5 drag and drop ---------------- */
+  var dndOut = q('int-dnd-out');
+  document.querySelectorAll('.dnd__item').forEach(function (item) {
+    item.addEventListener('dragstart', function (e) {
+      e.dataTransfer.setData('text/plain', item.textContent);
+      e.dataTransfer.setData('application/x-testbed', item.getAttribute('data-testid'));
+      e.dataTransfer.effectAllowed = 'move';
+      item.setAttribute('data-dragging', 'true');
+      dndOut.textContent = 'dragstart: ' + item.getAttribute('data-testid');
+    });
+    item.addEventListener('dragend', function () {
+      item.removeAttribute('data-dragging');
+      dndOut.textContent += '\ndragend, dropEffect=' + (event && event.dataTransfer ? event.dataTransfer.dropEffect : 'n/a');
+    });
+  });
+  document.querySelectorAll('.dnd__col').forEach(function (col) {
+    col.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      col.setAttribute('data-over', 'true');
+    });
+    col.addEventListener('dragleave', function () { col.removeAttribute('data-over'); });
+    col.addEventListener('drop', function (e) {
+      e.preventDefault();
+      col.removeAttribute('data-over');
+      var id = e.dataTransfer.getData('application/x-testbed');
+      var text = e.dataTransfer.getData('text/plain');
+      var node = id && q(id);
+      if (node) col.appendChild(node);
+      else if (text) {
+        var d = document.createElement('div');
+        d.className = 'dnd__item';
+        d.textContent = 'Dropped text: ' + text.slice(0, 80);
+        col.appendChild(d);
+      }
+      dndOut.textContent = 'drop on ' + col.getAttribute('data-testid') +
+        '\ntypes: ' + Array.prototype.slice.call(e.dataTransfer.types).join(', ') +
+        '\ntext/plain: ' + JSON.stringify(text.slice(0, 120));
+    });
+  });
+
+  /* ---------------- pointer sorting ---------------- */
+  var list = q('int-sortable');
+  var dragging = null;
+  list.addEventListener('pointerdown', function (e) {
+    var li = e.target.closest('li');
+    if (!li) return;
+    dragging = li;
+    li.setAttribute('data-active', 'true');
+    li.setPointerCapture(e.pointerId);
+  });
+  list.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    var over = document.elementFromPoint(e.clientX, e.clientY);
+    var li = over && over.closest ? over.closest('li') : null;
+    if (li && li !== dragging && li.parentNode === list) {
+      var rect = li.getBoundingClientRect();
+      var after = e.clientY > rect.top + rect.height / 2;
+      list.insertBefore(dragging, after ? li.nextSibling : li);
+    }
+  });
+  list.addEventListener('pointerup', function () {
+    if (!dragging) return;
+    dragging.removeAttribute('data-active');
+    dragging = null;
+    sortReport();
+  });
+  function sortReport() {
+    q('int-sort-out').textContent = 'order: ' + Array.prototype.map.call(list.children, function (li) {
+      return li.getAttribute('data-testid').replace('int-sort-', '');
+    }).join(', ');
+  }
+  sortReport();
+
+  /* ---------------- resizing ---------------- */
+  var box = q('int-resizer'), handle = q('int-resizer-handle');
+  var start = null;
+  handle.addEventListener('pointerdown', function (e) {
+    start = { x: e.clientX, y: e.clientY, w: box.offsetWidth, h: box.offsetHeight };
+    handle.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+  handle.addEventListener('pointermove', function (e) {
+    if (!start) return;
+    var w = Math.max(120, start.w + e.clientX - start.x);
+    var h = Math.max(80, start.h + e.clientY - start.y);
+    box.style.width = w + 'px';
+    box.style.height = h + 'px';
+    q('int-resizer-size').textContent = w + ' × ' + h;
+  });
+  handle.addEventListener('pointerup', function () { start = null; });
+
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(function (entries) {
+      q('int-resize-out').textContent = entries.map(function (en) {
+        var r = en.contentRect;
+        return (en.target.getAttribute('data-testid') || en.target.tagName) + ': ' +
+          Math.round(r.width) + ' × ' + Math.round(r.height);
+      }).join('\n');
+    });
+    ro.observe(box); ro.observe(q('int-resize-css'));
+  } else {
+    q('int-resize-out').textContent = 'ResizeObserver is not supported.';
+  }
+
+  /* ---------------- gestures ---------------- */
+  var g = q('int-gesture-area'), gOut = q('int-gesture-out');
+  var gStart = null, pressTimer = null, lastTap = 0;
+  g.addEventListener('pointerdown', function (e) {
+    gStart = { x: e.clientX, y: e.clientY, t: Date.now() };
+    pressTimer = setTimeout(function () { gOut.textContent = 'long-press (600 ms) at ' + Math.round(gStart.x) + ',' + Math.round(gStart.y); }, 600);
+  });
+  g.addEventListener('pointerup', function (e) {
+    clearTimeout(pressTimer);
+    if (!gStart) return;
+    var dx = e.clientX - gStart.x, dy = e.clientY - gStart.y, dt = Date.now() - gStart.t;
+    var now = Date.now();
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+      gOut.textContent = 'swipe ' + (dx > 0 ? 'right' : 'left') + '  dx=' + Math.round(dx) + '  in ' + dt + ' ms';
+    } else if (Math.abs(dy) > 40) {
+      gOut.textContent = 'swipe ' + (dy > 0 ? 'down' : 'up') + '  dy=' + Math.round(dy) + '  in ' + dt + ' ms';
+    } else if (now - lastTap < 320) {
+      gOut.textContent = 'double-tap';
+    } else if (dt < 600) {
+      gOut.textContent = 'tap (pointerType=' + e.pointerType + ')';
+    }
+    lastTap = now;
+    gStart = null;
+  });
+  g.addEventListener('pointercancel', function () { clearTimeout(pressTimer); gOut.textContent = 'pointercancel'; });
+
+  /* pinch zoom */
+  var zoomer = q('int-zoomer'), zimg = q('int-zoom-image');
+  var scale = 1, tx = 0, ty = 0, pointers = new Map(), pinchStart = 0;
+  function applyZoom() {
+    zimg.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+    q('int-zoom-scale').textContent = scale.toFixed(2);
+  }
+  zoomer.addEventListener('pointerdown', function (e) {
+    pointers.set(e.pointerId, e);
+    zoomer.setPointerCapture(e.pointerId);
+  });
+  zoomer.addEventListener('pointermove', function (e) {
+    if (!pointers.has(e.pointerId)) return;
+    var prev = pointers.get(e.pointerId);
+    pointers.set(e.pointerId, e);
+    var pts = Array.from(pointers.values());
+    if (pts.length === 2) {
+      var d = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
+      if (pinchStart) { scale = Math.min(6, Math.max(0.5, scale * d / pinchStart)); applyZoom(); }
+      pinchStart = d;
+    } else if (pts.length === 1) {
+      tx += e.clientX - prev.clientX;
+      ty += e.clientY - prev.clientY;
+      applyZoom();
+    }
+  });
+  ['pointerup', 'pointercancel'].forEach(function (t) {
+    zoomer.addEventListener(t, function (e) { pointers.delete(e.pointerId); pinchStart = 0; });
+  });
+  zoomer.addEventListener('wheel', function (e) {
+    if (!e.ctrlKey && !e.metaKey) return;
+    e.preventDefault();
+    scale = Math.min(6, Math.max(0.5, scale * (e.deltaY < 0 ? 1.08 : 0.92)));
+    applyZoom();
+  }, { passive: false });
+  applyZoom();
+
+  /* ---------------- keyboard ---------------- */
+  var kOut = q('int-key-out'), keyLines = [];
+  document.addEventListener('keydown', function (e) {
+    keyLines.unshift([
+      'key=' + JSON.stringify(e.key), 'code=' + e.code,
+      'ctrl=' + e.ctrlKey, 'meta=' + e.metaKey, 'alt=' + e.altKey, 'shift=' + e.shiftKey,
+      e.repeat ? 'repeat' : '', e.isComposing ? 'composing' : ''
+    ].filter(Boolean).join('  '));
+    kOut.textContent = keyLines.slice(0, 10).join('\n');
+
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      kOut.textContent = '⌘/Ctrl+K captured — the page prevented the browser default.\n' + kOut.textContent;
+    }
+    if (e.shiftKey && e.key === '?') {
+      kOut.textContent = 'Shift+? — a help shortcut would open here.\n' + kOut.textContent;
+    }
+    if (e.altKey && e.key === '1') {
+      q('int-tab-minus').focus();
+      kOut.textContent = 'Alt+1 — focused the tabindex="-1" button programmatically.\n' + kOut.textContent;
+    }
+  });
+  q('int-accesskey').addEventListener('click', function () {
+    kOut.textContent = 'Access key button activated.\n' + kOut.textContent;
+  });
+
+  /* ---------------- clipboard & selection ---------------- */
+  var cOut = q('int-clip-out');
+  q('int-copy').addEventListener('click', function () {
+    if (!navigator.clipboard) { cOut.textContent = 'Clipboard API not available.'; return; }
+    navigator.clipboard.writeText('Copied from the browser testbed at ' + new Date().toISOString())
+      .then(function () { cOut.textContent = 'writeText() succeeded.'; },
+            function (e) { cOut.textContent = 'writeText() failed: ' + e.name + ' — ' + e.message; });
+  });
+  q('int-copy-exec').addEventListener('click', function () {
+    var ta = document.createElement('textarea');
+    ta.value = 'Copied through document.execCommand("copy").';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { /* deprecated path */ }
+    ta.remove();
+    cOut.textContent = 'execCommand("copy") → ' + ok;
+  });
+  q('int-read').addEventListener('click', function () {
+    if (!navigator.clipboard || !navigator.clipboard.readText) { cOut.textContent = 'clipboard.readText() unavailable.'; return; }
+    navigator.clipboard.readText().then(function (t) {
+      cOut.textContent = 'clipboard contains: ' + JSON.stringify(t.slice(0, 300));
+    }, function (e) { cOut.textContent = 'readText() denied: ' + e.name; });
+  });
+  q('int-copy-image').addEventListener('click', function () {
+    if (!navigator.clipboard || !window.ClipboardItem) { cOut.textContent = 'ClipboardItem is not supported.'; return; }
+    fetch('../assets/media/thumb.png').then(function (r) { return r.blob(); }).then(function (b) {
+      return navigator.clipboard.write([new ClipboardItem({ 'image/png': b })]);
+    }).then(function () { cOut.textContent = 'Image written to the clipboard.'; },
+            function (e) { cOut.textContent = 'Image copy failed: ' + e.name + ' — ' + e.message; });
+  });
+  q('int-select-para').addEventListener('click', function () {
+    var r = document.createRange();
+    r.selectNodeContents(q('int-selectable'));
+    var s = getSelection();
+    s.removeAllRanges();
+    s.addRange(r);
+  });
+  document.addEventListener('selectionchange', function () {
+    var s = getSelection();
+    if (!s.rangeCount || s.isCollapsed) return;
+    var r = s.getRangeAt(0), rect = r.getBoundingClientRect();
+    cOut.textContent = 'selection: ' + JSON.stringify(s.toString().slice(0, 120)) +
+      '\nlength=' + s.toString().length +
+      '\nrect=' + Math.round(rect.x) + ',' + Math.round(rect.y) + ' ' +
+      Math.round(rect.width) + '×' + Math.round(rect.height);
+  });
+  q('int-paste-area').addEventListener('paste', function (e) {
+    var types = Array.prototype.slice.call((e.clipboardData || {}).types || []);
+    cOut.textContent = 'paste event, types: ' + types.join(', ');
+  });
+
+  /* ---------------- scrolling & observers ---------------- */
+  var sOut = q('int-scroll-out');
+  q('int-scroll-smooth').addEventListener('click', function () {
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  });
+  q('int-scroll-into-view').addEventListener('click', function () {
+    q('int-snap-3').scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  });
+  var locked = false;
+  q('int-scroll-lock').addEventListener('click', function () {
+    locked = !locked;
+    document.body.style.overflow = locked ? 'hidden' : '';
+    sOut.textContent = 'body scroll ' + (locked ? 'locked' : 'unlocked');
+  });
+  if (window.IntersectionObserver) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        en.target.setAttribute('data-visible', String(en.isIntersecting));
+      });
+      sOut.textContent = 'visible targets: ' + document.querySelectorAll('.observe[data-visible="true"]').length +
+        '\nscrollY=' + Math.round(window.scrollY) +
+        '\nratios: ' + entries.map(function (e) { return e.intersectionRatio.toFixed(2); }).join(', ');
+    }, { threshold: [0, 0.5, 1] });
+    document.querySelectorAll('.observe').forEach(function (n) { io.observe(n); });
+  }
+  q('int-snap').addEventListener('scroll', function () {
+    sOut.textContent = 'carousel scrollLeft = ' + Math.round(q('int-snap').scrollLeft);
+  }, { passive: true });
+
+  /* ---------------- animations ---------------- */
+  var aOut = q('int-anim-out'), cssBox = q('int-anim-css'), waBox = q('int-anim-waapi'), anim = null;
+  q('int-anim-toggle').addEventListener('click', function () {
+    cssBox.setAttribute('data-on', cssBox.getAttribute('data-on') === 'true' ? 'false' : 'true');
+  });
+  cssBox.addEventListener('transitionend', function (e) {
+    aOut.textContent = 'transitionend: ' + e.propertyName + ' after ' + e.elapsedTime.toFixed(2) + ' s';
+  });
+  q('int-anim-play').addEventListener('click', function () {
+    if (!waBox.animate) { aOut.textContent = 'Web Animations API is not supported.'; return; }
+    anim = waBox.animate([
+      { transform: 'translateX(0) rotate(0)', opacity: 1 },
+      { transform: 'translateX(190px) rotate(180deg)', opacity: .5 },
+      { transform: 'translateX(0) rotate(360deg)', opacity: 1 }
+    ], { duration: 1800, iterations: Infinity, easing: 'ease-in-out' });
+    aOut.textContent = 'animate() started, playState=' + anim.playState;
+  });
+  q('int-anim-pause').addEventListener('click', function () {
+    if (!anim) { aOut.textContent = 'Start the animation first.'; return; }
+    anim.playState === 'running' ? anim.pause() : anim.play();
+    aOut.textContent = 'playState=' + anim.playState + ', currentTime=' + Math.round(anim.currentTime) + ' ms';
+  });
+  q('int-anim-viewtransition').addEventListener('click', function () {
+    if (!document.startViewTransition) { aOut.textContent = 'View Transitions are not supported here.'; return; }
+    document.startViewTransition(function () {
+      var s = q('int-anim-css');
+      s.style.background = s.style.background === 'crimson' ? 'var(--accent)' : 'crimson';
+      s.style.borderRadius = s.style.borderRadius === '50%' ? 'var(--radius-sm)' : '50%';
+    });
+    aOut.textContent = 'startViewTransition() called.';
+  });
+  document.documentElement.setAttribute('data-page-script', 'ok');
+});
+</script>
+</body>
+</html>
