@@ -3,8 +3,6 @@
 A dependency-free static site that exercises as much of the web platform as a real site would —
 built to be pointed at a browser under development.
 
-**Live:** https://rockitmediarnd.github.io/browser-testbed/
-
 No build step, no npm, no CDN. Every page is plain HTML, CSS and ES5-compatible JavaScript, so the
 only thing between a test and the browser's native behaviour is the markup itself.
 
