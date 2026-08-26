@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>404 — Browser Testbed</title>
 <script>
-/* This document is served for any unknown path, at any depth, and the same file has to
-   work whether the site sits at the origin root or under a project sub-path. So the site
-   root is derived from the requested path, and the assets are linked from it. */
+/* This document is served for any unknown path, at any depth, so every reference in it
+   has to be resolved against the site root rather than against the requested path.
+
+   The root cannot be inferred from the path: on a root site "/a/b" has no prefix, while
+   on a project site the same URL means "site /a/, page b". So it is stated here, once. */
 (function () {
-  var m = location.pathname.match(/^\/[^/]+\//);
-  var root = (m && m[0] !== '/pages/') ? m[0] : '/';
-  window.__testbedRoot = root;
+  var BASE = '/';   /* '/<repo>/' when this site is served from a project sub-path */
+  window.__testbedRoot = BASE;
 
   /* A link that carries query parameters with values must land on the site root rather
      than an error — tracking and campaign parameters are appended to shared links all
@@ -19,14 +20,14 @@
      renders, so no 404 flashes on the way through. A bare unknown path still shows the
      real 404 below: that remains a deliberate test case. */
   var search = location.search;
-  if (search && search.length > 1 && location.pathname !== root) {
+  if (search && search.length > 1 && location.pathname !== BASE) {
     var hasValue = false;
     search.slice(1).split('&').forEach(function (pair) {
       var eq = pair.indexOf('=');
       if (eq > 0 && pair.slice(eq + 1) !== '') hasValue = true;
     });
     if (hasValue) {
-      location.replace(root + search + location.hash);
+      location.replace(BASE + search + location.hash);
       return;
     }
   }
@@ -35,7 +36,7 @@
     var l = document.createElement('link');
     l.rel = rel;
     if (type) l.type = type;
-    l.href = root + href;
+    l.href = BASE + href;
     document.head.appendChild(l);
   }
   link('icon', 'image/svg+xml', 'assets/favicon.svg');
