@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Final page</title>
+<style>
+* { box-sizing: border-box; margin: 0; }
+body { font-family: -apple-system, system-ui, sans-serif; background: #fff; color: #1d1d1f;
+  padding: max(24px, env(safe-area-inset-top)) 24px 24px; line-height: 1.5; }
+h1 { font-size: 28px; margin-bottom: 12px; }
+p { margin-bottom: 16px; }
+nav a { display: block; padding: 14px 16px; margin-bottom: 10px; border-radius: 12px; background: #f2f2f7;
+  color: #0a7cff; text-decoration: none; font-weight: 600; }
+code { background: #f2f2f7; padding: 2px 6px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<h1 id="h">Final page</h1>
+<p>Reached through the tracking redirect. This is the link Portal saves and opens after the preloader on the next launch.</p>
+<p>Came from: <code id="from">direct</code></p>
+<nav>
+<a href="final.html?page=2">Go to page 2 (test back / forward)</a>
+<a href="final.html?page=3">Go to page 3</a>
+</nav>
+<script>
+const q = new URLSearchParams(location.search);
+if (q.get('from')) document.getElementById('from').textContent = q.get('from');
+if (q.get('page')) document.getElementById('h').textContent = 'Final page ' + q.get('page');
+</script>
+</body>
+</html>
