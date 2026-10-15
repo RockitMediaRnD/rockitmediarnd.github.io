@@ -6,17 +6,11 @@ testbed shell and no entry in `assets/js/nav-data.js`.
 | File | What it is |
 |---|---|
 | `land-1.html` … `land-3.html` | Three landings, one CTA each |
-| `track.html` | Client-side redirect that stands in for a tracker's HTTP 302 |
-| `final.html` | The page the CTA ends on; has links to try back / forward / reload |
+| `final.html` | The page the CTA leads to; has links to try back / forward / reload |
 
-The chain:
-
-```
-land-N.html CTA -> track.html?to=final.html%3Ffrom%3Dland-N -> final.html?from=land-N
-```
-
-`track.html` forwards only to a relative path inside `ad-lands/` and drops every other query
-parameter. `final.html?from=land-N` is the final link Portal saves.
+A CTA goes straight to `final.html?from=land-N`, the final link Portal saves. GitHub Pages
+cannot answer with an HTTP 302, and Portal stores the first page that finishes loading after
+the CTA, so a client-side redirect page in between would be stored in place of `final.html`.
 
 `/getData` at the site root (a file with no extension) is the config answer: its `offer` key
 carries the three landing links.
