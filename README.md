@@ -84,6 +84,7 @@ assets/js/features.js the feature-detection table
 assets/js/worker.js   worker used by the Storage page
 assets/media/         locally generated samples: PNG/JPEG/AVIF/HEIC, MP4, WAV, M4A, VTT, PDF, CSV, JSON, TXT
 pages/                one document per topic
+ad-lands/             standalone OrbitTap ad landings; /getData (root, no extension) is their config
 ```
 
 Adding a page means creating the HTML file and adding one entry to `assets/js/nav-data.js`; navigation

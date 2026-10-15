@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>
+/* Stands in for the tracker's HTTP 302: forwards to the "to" target only, never other params. */
+function resolveTarget(to, pageHref) {
+  if (typeof to !== 'string' || to === '') return null;
+  if (/^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(to)) return null;
+  if (to.charAt(0) === '/' || to.indexOf('\\') !== -1 || to.indexOf('..') !== -1) return null;
+  var page, resolved;
+  try {
+    page = new URL(pageHref);
+    resolved = new URL(to, pageHref);
+  } catch (e) {
+    return null;
+  }
+  var dir = page.pathname.slice(0, page.pathname.lastIndexOf('/') + 1);
+  if (resolved.origin !== page.origin) return null;
+  if (resolved.pathname.indexOf(dir) !== 0) return null;
+  return resolved.href;
+}
+if (typeof location !== 'undefined') {
+  (function () {
+    var to = null;
+    try { to = new URL(location.href).searchParams.get('to'); } catch (e) {}
+    var target = resolveTarget(to, location.href);
+    if (target) location.replace(target);
+    else window.__badTarget = true;
+  })();
+}
+if (typeof module !== 'undefined') module.exports = resolveTarget;
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Redirecting</title>
+</head>
+<body>
+<p id="msg">Redirecting&hellip;</p>
+<script>
+if (window.__badTarget) document.getElementById('msg').textContent = 'Bad redirect target';
+</script>
+</body>
+</html>
