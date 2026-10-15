@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tidewhistle Merge - Get the game</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root { --bg: #0e0e12; --card: #1a1a22; --line: #2a2a35; --ink: #f2f2f7; --muted: #9a9aa8; --accent: #7b8cff; --bar: 76px; }
+html { background: var(--bg); }
+body { font-family: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.45;
+  -webkit-text-size-adjust: 100%; padding: 0 env(safe-area-inset-right) calc(var(--bar) + env(safe-area-inset-bottom)) env(safe-area-inset-left); }
+a { color: var(--accent); }
+.wrap { max-width: 720px; margin: 0 auto; padding: max(16px, env(safe-area-inset-top)) 20px 24px; }
+.head { display: flex; gap: 16px; align-items: center; }
+.head svg { width: 96px; height: 96px; border-radius: 22px; flex: none; }
+.head h1 { font-size: 24px; line-height: 1.2; }
+.head p { color: var(--muted); font-size: 15px; }
+.meta { display: flex; margin: 18px -20px 0; padding: 12px 20px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  overflow-x: auto; gap: 0; text-align: center; }
+.meta div { flex: 1 0 96px; border-left: 1px solid var(--line); padding: 0 8px; }
+.meta div:first-child { border-left: 0; }
+.meta small { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+.meta b { font-size: 18px; }
+.tabs { display: flex; gap: 8px; margin: 18px 0 6px; overflow-x: auto; }
+.tabs a { flex: none; padding: 8px 14px; border-radius: 999px; background: var(--card); color: var(--ink); text-decoration: none; font-size: 15px; }
+.tabs a[aria-current="page"] { background: var(--accent); color: #0e0e12; font-weight: 700; }
+section[data-page] { display: none; }
+section[data-page].on { display: block; }
+h2 { font-size: 21px; margin: 26px 0 10px; }
+.shots { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -20px; padding: 0 20px 6px; }
+.shots svg { flex: none; width: 200px; height: 356px; border-radius: 18px; scroll-snap-align: start; }
+.card { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+.card .stars { color: #ffcc4d; letter-spacing: 2px; }
+.card i { display: block; color: var(--muted); font-style: normal; font-size: 13px; margin-top: 6px; }
+dl.info { display: grid; grid-template-columns: auto 1fr; border-top: 1px solid var(--line); }
+dl.info dt, dl.info dd { padding: 12px 0; border-bottom: 1px solid var(--line); }
+dl.info dt { color: var(--muted); padding-right: 16px; }
+dl.info dd { text-align: right; }
+.links { display: grid; gap: 10px; margin-top: 16px; }
+.links a { display: block; padding: 14px 16px; background: var(--card); border-radius: 14px; text-decoration: none; }
+details.debug { margin-top: 28px; background: var(--card); border-radius: 12px; padding: 12px 14px; font-size: 13px; color: var(--muted); }
+details.debug code { color: var(--ink); word-break: break-all; }
+footer { margin-top: 26px; text-align: center; font-size: 11px; color: var(--muted); }
+.bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: rgba(20,20,26,.92);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-top: 1px solid var(--line);
+  padding: 12px max(20px, env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); }
+.bar .inner { max-width: 720px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+.bar .inner span { flex: 1; font-size: 14px; color: var(--muted); }
+.bar button { min-width: 140px; min-height: 48px; border: 0; border-radius: 999px; background: var(--accent); color: #0e0e12;
+  font: inherit; font-weight: 800; font-size: 17px; cursor: pointer; }
+.toast { position: fixed; left: 50%; bottom: calc(var(--bar) + 16px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+  background: #fff; color: #111; padding: 10px 16px; border-radius: 999px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.toast.on { opacity: 1; }
+@media (orientation: landscape) and (min-width: 600px) {
+  .wrap { max-width: 960px; }
+  .reviews { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .reviews .card { margin: 0; }
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="top">
+  <div class="head">
+    <svg viewBox="0 0 96 96" aria-hidden="true"><defs><linearGradient id="ig" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7b2ff7"/><stop offset="1" stop-color="#f107a3"/></linearGradient></defs><rect width="96" height="96" rx="22" fill="url(#ig)"/><path d="M26 60c11-22 33-22 44 0" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round"/><circle cx="48" cy="36" r="9" fill="#ffd166"/></svg>
+    <div>
+      <h1>Tidewhistle Merge</h1>
+      <p>Quellbrook Studio</p>
+      <p>Merge tiles, raise your island</p>
+    </div>
+  </div>
+
+  <div class="meta">
+    <div><small>Ratings</small><b>4.8</b></div>
+    <div><small>Age</small><b>4+</b></div>
+    <div><small>Chart</small><b>#12</b></div>
+    <div><small>Size</small><b>182 MB</b></div>
+    <div><small>Language</small><b>EN</b></div>
+  </div>
+
+  <nav class="tabs" aria-label="Sections">
+    <a href="final-app.html" data-p="1">Overview</a>
+    <a href="final-app.html?p=2" data-p="2">Reviews</a>
+    <a href="final-app.html?p=3" data-p="3">Version history</a>
+  </nav>
+
+  <section data-page="1">
+    <h2>Preview</h2>
+    <div class="shots">
+      <svg viewBox="0 0 200 356" aria-hidden="true"><rect width="200" height="356" fill="#3a1c71"/><circle cx="100" cy="140" r="60" fill="#ffd166"/><rect x="30" y="250" width="140" height="28" rx="14" fill="#f107a3"/></svg>
+      <svg viewBox="0 0 200 356" aria-hidden="true"><rect width="200" height="356" fill="#0f3460"/><g fill="#3ddc97"><rect x="30" y="60" width="40" height="40" rx="8"/><rect x="80" y="60" width="40" height="40" rx="8"/><rect x="130" y="60" width="40" height="40" rx="8"/><rect x="55" y="110" width="40" height="40" rx="8"/><rect x="105" y="110" width="40" height="40" rx="8"/></g></svg>
+      <svg viewBox="0 0 200 356" aria-hidden="true"><rect width="200" height="356" fill="#2d0b3a"/><path d="M20 260 Q100 80 180 260Z" fill="#7b2ff7"/><circle cx="100" cy="170" r="18" fill="#ff6b6b"/></svg>
+      <svg viewBox="0 0 200 356" aria-hidden="true"><rect width="200" height="356" fill="#1b4332"/><circle cx="70" cy="120" r="32" fill="#95d5b2"/><circle cx="130" cy="190" r="40" fill="#52b788"/></svg>
+    </div>
+
+    <h2>About this game</h2>
+    <p>Tidewhistle Merge is a calm puzzle game about growing a small island in a sea of glowing tiles. Merge three tiles to make a bigger one, unlock decorations and meet the island crew.</p>
+    <p style="margin-top:10px">Play at your own pace: there are no timers in calm mode, and every level can be played offline. <a href="#info">See the information table</a>.</p>
+
+    <h2>What's new</h2>
+    <div class="card">Version 3.4 · Harbour festival event, 20 new levels, faster loading on older devices.</div>
+
+    <h2>Ratings &amp; reviews</h2>
+    <div class="reviews">
+      <div class="card"><span class="stars">★★★★★</span><p>Relaxing and smart. I play two levels before bed.</p><i>tilefan_88 · test review</i></div>
+      <div class="card"><span class="stars">★★★★☆</span><p>Nice art. I would like more music tracks.</p><i>moss_and_moon · test review</i></div>
+    </div>
+    <p><a href="final-app.html?p=2">Read all reviews</a></p>
+
+    <h2 id="info">Information</h2>
+    <dl class="info">
+      <dt>Developer</dt><dd>Quellbrook Studio (invented)</dd>
+      <dt>Category</dt><dd>Puzzle</dd>
+      <dt>Size</dt><dd>182 MB</dd>
+      <dt>Compatibility</dt><dd>Phone and tablet</dd>
+      <dt>Languages</dt><dd>English</dd>
+      <dt>Price</dt><dd>Free, optional in-game items</dd>
+      <dt>Data collection</dt><dd>None on this test page</dd>
+    </dl>
+
+    <div class="links">
+      <a href="final-app.html?p=3" target="_blank" rel="noopener" data-test="target-blank">Developer notes (opens in a new window)</a>
+      <a href="#top">Back to top</a>
+    </div>
+  </section>
+
+  <section data-page="2">
+    <h2>All reviews</h2>
+    <div class="reviews">
+      <div class="card"><span class="stars">★★★★★</span><p>Relaxing and smart. I play two levels before bed.</p><i>tilefan_88 · test review</i></div>
+      <div class="card"><span class="stars">★★★★☆</span><p>Nice art. I would like more music tracks.</p><i>moss_and_moon · test review</i></div>
+      <div class="card"><span class="stars">★★★★★</span><p>Finally a merge game that does not push me every minute.</p><i>quietcoder · test review</i></div>
+      <div class="card"><span class="stars">★★★☆☆</span><p>Levels 40 to 60 are hard. The hint button helps.</p><i>harbor_cat · test review</i></div>
+      <div class="card"><span class="stars">★★★★★</span><p>Works great offline on the train.</p><i>commute_puzzler · test review</i></div>
+      <div class="card"><span class="stars">★★★★☆</span><p>The festival event is fun. Decorations are cute.</p><i>island_keeper · test review</i></div>
+    </div>
+    <p><a href="final-app.html?p=3">Next: version history</a></p>
+  </section>
+
+  <section data-page="3">
+    <h2>Version history</h2>
+    <div class="card"><b>3.4</b><p>Harbour festival event, 20 new levels, faster loading.</p></div>
+    <div class="card"><b>3.3</b><p>Calm mode, new music track, fixes for small screens.</p></div>
+    <div class="card"><b>3.2</b><p>Cloud save, landscape layout for tablets.</p></div>
+    <div class="card"><b>3.1</b><p>Daily quests and a new island crew member.</p></div>
+    <div class="card"><b>3.0</b><p>The island redesign and 50 new levels.</p></div>
+    <p><a href="final-app.html">Back to overview</a></p>
+  </section>
+
+  <details class="debug">
+    <summary>Test info</summary>
+    <p style="margin-top:8px">Page: <code id="page-url"></code></p>
+    <p>Parameters: <code id="params">none</code></p>
+  </details>
+
+  <footer>Tidewhistle Merge and Quellbrook Studio are invented names. Test content — RockitMedia R&amp;D</footer>
+</div>
+
+<div class="bar">
+  <div class="inner">
+    <span>Free · In-game items</span>
+    <button type="button" id="get">Get</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status">Test page: nothing is installed.</div>
+
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var p = q.get('p') || '1';
+  if (!/^[123]$/.test(p)) p = '1';
+  document.querySelectorAll('section[data-page]').forEach(function (s) { s.classList.toggle('on', s.getAttribute('data-page') === p); });
+  document.querySelectorAll('.tabs a').forEach(function (a) { if (a.getAttribute('data-p') === p) a.setAttribute('aria-current', 'page'); });
+  document.getElementById('page-url').textContent = location.pathname + location.search;
+  var shown = [];
+  q.forEach(function (v, k) { if (k !== 'p') shown.push(k + '=' + v); });
+  if (shown.length) document.getElementById('params').textContent = shown.join(' · ');
+  var toast = document.getElementById('toast');
+  document.getElementById('get').addEventListener('click', function () {
+    toast.classList.add('on');
+    setTimeout(function () { toast.classList.remove('on'); }, 2200);
+  });
+})();
+</script>
+</body>
+</html>
