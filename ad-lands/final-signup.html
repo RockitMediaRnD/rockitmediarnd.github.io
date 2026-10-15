@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zentrova - Your plan is ready</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root { --brand: #0f9d76; --brand2: #2563eb; --ink: #14202b; --muted: #5d6b78; --line: #e3e8ee; --soft: #f3f7f9; --bar: 84px; }
+html { background: #ffffff; }
+body { font-family: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif; color: var(--ink); line-height: 1.5; -webkit-text-size-adjust: 100%;
+  background: linear-gradient(160deg, var(--brand) 0, var(--brand2) 340px, #ffffff 340px) no-repeat, #ffffff;
+  padding: 0 env(safe-area-inset-right) calc(var(--bar) + env(safe-area-inset-bottom)) env(safe-area-inset-left); }
+a { color: var(--brand2); }
+.top { color: #fff; max-width: 760px; margin: 0 auto; padding: calc(18px + env(safe-area-inset-top)) 20px 0; }
+.top .brand { font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+.top .brand svg { width: 26px; height: 26px; }
+.top h1 { font-size: 28px; line-height: 1.2; margin: 18px 0 6px; }
+.top p { opacity: .9; }
+.tabs { display: flex; gap: 8px; margin-top: 16px; overflow-x: auto; }
+.tabs a { flex: none; color: #fff; text-decoration: none; padding: 7px 14px; border-radius: 999px; background: rgba(255,255,255,.18); font-size: 15px; }
+.tabs a[aria-current="page"] { background: #fff; color: var(--brand); font-weight: 700; }
+main { max-width: 760px; margin: 0 auto; padding: 22px 20px 30px; }
+.card { background: #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(20,32,43,.12); padding: 20px; }
+section[data-page] { display: none; }
+section[data-page].on { display: block; }
+.summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.summary div { background: var(--soft); border-radius: 12px; padding: 10px; text-align: center; }
+.summary small { display: block; color: var(--muted); font-size: 12px; }
+.summary b { font-size: 16px; }
+h2 { font-size: 21px; margin: 26px 0 10px; scroll-margin-top: 16px; }
+form .field { margin-top: 14px; }
+form label { display: block; font-weight: 600; margin-bottom: 6px; }
+form input[type="text"] { width: 100%; font: inherit; font-size: 17px; padding: 13px 14px; border: 1px solid var(--line); border-radius: 12px; }
+.plans { display: grid; gap: 10px; }
+.plans label { display: flex; gap: 12px; align-items: center; border: 2px solid var(--line); border-radius: 14px; padding: 14px; font-weight: 400; margin: 0; }
+.plans label:has(input:checked) { border-color: var(--brand); background: #ecf8f3; }
+.plans input { width: 20px; height: 20px; accent-color: var(--brand); }
+.plans b { display: block; }
+.plans span { color: var(--muted); font-size: 14px; }
+.check { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; font-weight: 400 !important; color: var(--muted); font-size: 14px; }
+.hint { color: var(--muted); font-size: 13px; margin-top: 10px; }
+.week { display: grid; gap: 10px; }
+.week div { display: flex; gap: 12px; align-items: center; background: var(--soft); border-radius: 14px; padding: 12px 14px; }
+.week b { width: 44px; flex: none; color: var(--brand); }
+details { border-bottom: 1px solid var(--line); padding: 14px 0; }
+details summary { font-weight: 600; cursor: pointer; }
+details p { margin-top: 8px; color: var(--muted); }
+.links { display: grid; gap: 10px; margin-top: 18px; }
+.links a { display: block; padding: 14px 16px; background: var(--soft); border-radius: 14px; text-decoration: none; font-weight: 600; }
+details.debug { margin-top: 28px; background: var(--soft); border-radius: 12px; padding: 12px 14px; font-size: 13px; color: var(--muted); border: 0; }
+details.debug code { color: var(--ink); word-break: break-all; }
+footer { margin-top: 24px; text-align: center; font-size: 11px; color: var(--muted); }
+.bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: #fff; border-top: 1px solid var(--line);
+  padding: 12px max(16px, env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+.bar .inner { max-width: 760px; margin: 0 auto; display: flex; gap: 12px; align-items: center; }
+.bar .inner span { font-size: 13px; color: var(--muted); line-height: 1.25; }
+.bar .inner span b { display: block; color: var(--ink); font-size: 16px; }
+.bar button { flex: 1; min-height: 56px; border: 0; border-radius: 14px; background: var(--brand); color: #fff; font: inherit;
+  font-size: 18px; font-weight: 800; cursor: pointer; }
+.toast { position: fixed; left: 50%; bottom: calc(var(--bar) + 16px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+  background: #14202b; color: #fff; padding: 10px 16px; border-radius: 999px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.toast.on { opacity: 1; }
+@media (orientation: landscape) and (min-width: 600px) {
+  body { background: linear-gradient(160deg, var(--brand) 0, var(--brand2) 240px, #ffffff 240px) no-repeat, #ffffff; }
+  .top, main { max-width: 980px; }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  .split h2:first-child { margin-top: 0; }
+}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="13" fill="#fff"/><path d="M7 14l4 4 8-9" stroke="#0f9d76" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Zentrova</div>
+  <h1 id="title">Your 4-week plan is ready</h1>
+  <p>Made from your answers. Start with a free week.</p>
+  <nav class="tabs" aria-label="Pages">
+    <a href="final-signup.html" data-p="1">Your plan</a>
+    <a href="final-signup.html?p=2" data-p="2">Sample week</a>
+    <a href="final-signup.html?p=3" data-p="3">Questions</a>
+  </nav>
+</div>
+
+<main>
+  <div class="card">
+    <section data-page="1">
+      <div class="summary">
+        <div><small>Goal</small><b id="goal">Energy</b></div>
+        <div><small>Level</small><b id="level">Beginner</b></div>
+        <div><small>Per day</small><b id="time">20 min</b></div>
+      </div>
+
+      <div class="split">
+        <div>
+          <h2>Choose your start</h2>
+          <form id="start" novalidate>
+            <div class="plans">
+              <label><input type="radio" name="plan" value="week" checked><span><b>Free week</b><span>Then choose to continue or stop</span></span></label>
+              <label><input type="radio" name="plan" value="month"><span><b>4 weeks</b><span>The full plan from your answers</span></span></label>
+            </div>
+            <div class="field">
+              <label for="nick">Nickname for your plan (optional)</label>
+              <input type="text" id="nick" autocomplete="off" maxlength="24" placeholder="For example: Morning moves">
+            </div>
+            <label class="check"><input type="checkbox" id="agree"> I understand this is a test page and nothing is sent.</label>
+            <p class="hint">This form has no action. Your input stays on this page and is lost when you leave it.</p>
+          </form>
+        </div>
+        <div>
+          <h2 id="inside">What is inside</h2>
+          <div class="week">
+            <div><b>Wk 1</b>Short daily sessions to build the habit</div>
+            <div><b>Wk 2</b>One new movement each day</div>
+            <div><b>Wk 3</b>Longer sessions on three days</div>
+            <div><b>Wk 4</b>Your own mix and a progress check</div>
+          </div>
+          <p style="margin-top:12px"><a href="final-signup.html?p=2">See a sample week</a></p>
+        </div>
+      </div>
+
+      <h2>Why it works</h2>
+      <p>Small sessions are easier to keep. The plan starts below your level and adds a little each week, so it stays possible on a busy day.</p>
+      <p style="margin-top:10px">Each session has a warm-up, a main part and a cool-down. Every movement has a short text description and a simpler version.</p>
+
+      <h2 id="faq">Questions</h2>
+      <details><summary>Do I need equipment?</summary><p>No. A mat or a towel is enough.</p></details>
+      <details><summary>Can I change my answers?</summary><p>Yes. Go back to the quiz and answer again.</p></details>
+      <details><summary>Is this a real subscription?</summary><p>No. This is a sample page. There is no subscription and no payment.</p></details>
+
+      <div class="links">
+        <a href="#inside">Jump to what is inside</a>
+        <a href="final-signup.html?p=3" target="_blank" rel="noopener" data-test="target-blank">All questions in a new window</a>
+      </div>
+    </section>
+
+    <section data-page="2">
+      <h2>Sample week</h2>
+      <div class="week">
+        <div><b>Mon</b>Warm-up, 3 rounds of easy squats and wall push-ups</div>
+        <div><b>Tue</b>Walk 15 minutes, stretch 5 minutes</div>
+        <div><b>Wed</b>Core: dead bug, bird dog, side plank on knees</div>
+        <div><b>Thu</b>Rest or an easy walk</div>
+        <div><b>Fri</b>Full-body circuit, 2 rounds</div>
+        <div><b>Sat</b>Mobility flow for hips and back</div>
+        <div><b>Sun</b>Rest</div>
+      </div>
+      <p style="margin-top:16px"><a href="final-signup.html?p=3">Next: questions</a></p>
+    </section>
+
+    <section data-page="3">
+      <h2>Questions</h2>
+      <details open><summary>What is Zentrova?</summary><p>An invented name for a sample fitness plan page.</p></details>
+      <details><summary>Is my data stored?</summary><p>No. The quiz answers are only in the page link. Nothing is stored or sent.</p></details>
+      <details><summary>Why is there a timer on the quiz?</summary><p>Real funnels use one. Here it is decoration only.</p></details>
+      <details><summary>Can I cancel?</summary><p>There is nothing to cancel. No subscription exists.</p></details>
+      <p style="margin-top:16px"><a href="final-signup.html">Back to your plan</a></p>
+    </section>
+  </div>
+
+  <details class="debug">
+    <summary>Test info</summary>
+    <p style="margin-top:8px">Page: <code id="page-url"></code></p>
+    <p>Parameters: <code id="params">none</code></p>
+  </details>
+
+  <footer>Zentrova is an invented name. Test content — RockitMedia R&amp;D</footer>
+</main>
+
+<div class="bar">
+  <div class="inner">
+    <span>Today<b>$0.00</b></span>
+    <button type="submit" form="start">Start my plan</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status">Test page: nothing was sent.</div>
+
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var p = q.get('p') || '1';
+  if (!/^[123]$/.test(p)) p = '1';
+  document.querySelectorAll('section[data-page]').forEach(function (s) { s.classList.toggle('on', s.getAttribute('data-page') === p); });
+  document.querySelectorAll('.tabs a').forEach(function (a) { if (a.getAttribute('data-p') === p) a.setAttribute('aria-current', 'page'); });
+
+  var goals = { energy: 'Energy', strength: 'Strength', flex: 'Mobility' };
+  var levels = { '1': 'Beginner', '2': 'Active', '3': 'Trained' };
+  if (goals[q.get('goal')]) document.getElementById('goal').textContent = goals[q.get('goal')];
+  if (levels[q.get('level')]) document.getElementById('level').textContent = levels[q.get('level')];
+  if (/^(10|20|30)$/.test(q.get('time') || '')) document.getElementById('time').textContent = q.get('time') + ' min';
+
+  document.getElementById('page-url').textContent = location.pathname + location.search;
+  var shown = [];
+  q.forEach(function (v, k) { if (k !== 'p') shown.push(k + '=' + v); });
+  if (shown.length) document.getElementById('params').textContent = shown.join(' · ');
+
+  var toast = document.getElementById('toast');
+  document.getElementById('start').addEventListener('submit', function (e) {
+    e.preventDefault();
+    toast.classList.add('on');
+    setTimeout(function () { toast.classList.remove('on'); }, 2200);
+  });
+})();
+</script>
+</body>
+</html>

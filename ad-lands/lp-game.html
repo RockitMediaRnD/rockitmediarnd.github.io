@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tidewhistle Merge - Play free</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif; color: #f4f1ff;
+  background-image: linear-gradient(165deg, #2b1055 0%, #11092a 45%, #050312 100%); background-attachment: scroll;
+  min-height: 100vh; line-height: 1.45; -webkit-text-size-adjust: 100%; }
+.wrap { max-width: 560px; margin: 0 auto; padding: 20px 20px 32px; }
+.top { display: flex; align-items: center; gap: 12px; }
+.icon { width: 52px; height: 52px; border-radius: 13px; flex: none; }
+.top b { display: block; font-size: 17px; }
+.top span { font-size: 13px; opacity: .7; }
+.ad { margin-left: auto; font-size: 11px; border: 1px solid rgba(255,255,255,.35); border-radius: 4px; padding: 1px 5px; opacity: .7; }
+.hero { margin: 18px -20px 0; position: relative; }
+.hero svg { display: block; width: 100%; height: auto; }
+h1 { font-size: 30px; line-height: 1.15; margin: 18px 0 8px; letter-spacing: -.01em; }
+.lead { font-size: 17px; opacity: .85; }
+.stats { display: flex; justify-content: space-between; margin: 20px 0; text-align: center; }
+.stats div { flex: 1; }
+.stats b { display: block; font-size: 20px; color: #ffd166; }
+.stats span { font-size: 12px; opacity: .65; }
+.cta { display: block; text-align: center; padding: 18px; border-radius: 16px; font-size: 19px; font-weight: 800;
+  text-decoration: none; color: #1a0f00; background: linear-gradient(180deg, #ffe08a, #ffb703);
+  box-shadow: 0 10px 30px rgba(255,183,3,.35); animation: pulse 2.2s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: scale(1.03); } }
+@media (prefers-reduced-motion: reduce) { .cta { animation: none; } }
+.note { text-align: center; font-size: 12px; opacity: .6; margin-top: 10px; }
+h2 { font-size: 20px; margin: 30px 0 12px; }
+.shots { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -20px; padding: 0 20px 8px; }
+.shots svg { flex: none; width: 150px; height: 266px; border-radius: 14px; scroll-snap-align: start; }
+ul.feat { list-style: none; display: grid; gap: 10px; }
+ul.feat li { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 12px 14px; }
+.review { background: rgba(255,255,255,.05); border-radius: 12px; padding: 14px; margin-bottom: 10px; font-size: 15px; }
+.review .stars { color: #ffd166; letter-spacing: 2px; }
+.review i { display: block; font-size: 12px; opacity: .55; font-style: normal; margin-top: 6px; }
+.more { display: block; text-align: center; margin: 22px 0 0; color: #b8a6ff; font-weight: 600; text-decoration: underline; }
+footer { margin-top: 34px; font-size: 11px; opacity: .5; text-align: center; }
+@media (orientation: landscape) and (min-width: 600px) {
+  .wrap { max-width: 860px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; }
+  .top, h2, .shots, ul.feat, .reviews, .more, footer { grid-column: 1 / -1; }
+  .hero { margin: 18px 0 0; grid-row: span 5; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <svg class="icon" viewBox="0 0 52 52" aria-hidden="true"><defs><linearGradient id="ig" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7b2ff7"/><stop offset="1" stop-color="#f107a3"/></linearGradient></defs><rect width="52" height="52" rx="13" fill="url(#ig)"/><path d="M14 32c6-12 18-12 24 0" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="26" cy="20" r="5" fill="#ffd166"/></svg>
+    <div><b>Tidewhistle Merge</b><span>Quellbrook Studio · Puzzle</span></div>
+    <span class="ad">Ad</span>
+  </div>
+
+  <div class="hero">
+    <svg viewBox="0 0 400 260" role="img" aria-label="An island in a sea of glowing tiles">
+      <defs>
+        <radialGradient id="glow" cx=".5" cy=".4" r=".6"><stop offset="0" stop-color="#ff6ec7" stop-opacity=".7"/><stop offset="1" stop-color="#ff6ec7" stop-opacity="0"/></radialGradient>
+        <linearGradient id="isl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3ddc97"/><stop offset="1" stop-color="#16795a"/></linearGradient>
+      </defs>
+      <rect width="400" height="260" fill="url(#glow)"/>
+      <g fill="#ffffff" opacity=".8"><circle cx="40" cy="30" r="1.5"/><circle cx="330" cy="22" r="1.2"/><circle cx="270" cy="60" r="1"/><circle cx="90" cy="70" r="1"/><circle cx="360" cy="90" r="1.6"/></g>
+      <ellipse cx="200" cy="200" rx="150" ry="34" fill="#1b0f3d"/>
+      <path d="M80 196 Q200 90 320 196Z" fill="url(#isl)"/>
+      <rect x="180" y="120" width="40" height="50" rx="6" fill="#ffd166"/>
+      <path d="M172 124 L200 98 L228 124Z" fill="#ff6b6b"/>
+      <g transform="translate(60 214)"><rect width="34" height="34" rx="8" fill="#7b2ff7"/><rect x="44" width="34" height="34" rx="8" fill="#f107a3"/><rect x="88" width="34" height="34" rx="8" fill="#3ddc97"/><rect x="176" width="34" height="34" rx="8" fill="#ffd166"/><rect x="220" width="34" height="34" rx="8" fill="#7b2ff7"/></g>
+    </svg>
+  </div>
+
+  <div>
+    <h1>Merge tiles. Raise an island. Play free today.</h1>
+    <p class="lead">Combine glowing tiles to grow your island, unlock 200+ handcrafted levels and play offline anywhere.</p>
+    <div class="stats">
+      <div><b>4.8</b><span>rating</span></div>
+      <div><b>200+</b><span>levels</span></div>
+      <div><b>0</b><span>ads in levels</span></div>
+    </div>
+    <a class="cta" href="final-app.html?from=lp-game" data-cta="plain-link">Play free now</a>
+    <p class="note">No sign-up. Works offline.</p>
+  </div>
+
+  <h2>Screenshots</h2>
+  <div class="shots">
+    <svg viewBox="0 0 150 266" aria-hidden="true"><rect width="150" height="266" fill="#3a1c71"/><circle cx="75" cy="100" r="44" fill="#ffd166"/><rect x="20" y="180" width="110" height="20" rx="10" fill="#f107a3"/></svg>
+    <svg viewBox="0 0 150 266" aria-hidden="true"><rect width="150" height="266" fill="#0f3460"/><g fill="#3ddc97"><rect x="20" y="40" width="30" height="30" rx="6"/><rect x="60" y="40" width="30" height="30" rx="6"/><rect x="100" y="40" width="30" height="30" rx="6"/><rect x="40" y="80" width="30" height="30" rx="6"/><rect x="80" y="80" width="30" height="30" rx="6"/></g><rect x="20" y="200" width="110" height="20" rx="10" fill="#ffd166"/></svg>
+    <svg viewBox="0 0 150 266" aria-hidden="true"><rect width="150" height="266" fill="#2d0b3a"/><path d="M20 200 Q75 60 130 200Z" fill="#7b2ff7"/><circle cx="75" cy="120" r="14" fill="#ff6b6b"/></svg>
+    <svg viewBox="0 0 150 266" aria-hidden="true"><rect width="150" height="266" fill="#1b4332"/><circle cx="50" cy="90" r="24" fill="#95d5b2"/><circle cx="100" cy="140" r="30" fill="#52b788"/><rect x="20" y="210" width="110" height="20" rx="10" fill="#fff"/></svg>
+  </div>
+
+  <h2>Why players stay</h2>
+  <ul class="feat">
+    <li>Daily island quests with fresh rewards</li>
+    <li>Relaxing music and no timers in calm mode</li>
+    <li>Cloud save across your devices</li>
+    <li>Weekly events with limited decorations</li>
+  </ul>
+
+  <h2>What players say</h2>
+  <div class="reviews">
+    <div class="review"><span class="stars">★★★★★</span><p>Best way to wind down after work. The island grows on you.</p><i>tilefan_88 · test review</i></div>
+    <div class="review"><span class="stars">★★★★★</span><p>Finally a merge game that does not push me every minute.</p><i>moss_and_moon · test review</i></div>
+    <div class="review"><span class="stars">★★★★☆</span><p>Levels 40 to 60 are tricky, but fair.</p><i>quietcoder · test review</i></div>
+  </div>
+
+  <a class="more" href="final-app.html?from=lp-game-blank" target="_blank" rel="noopener" data-cta="target-blank">See all features in a new window</a>
+
+  <footer>Tidewhistle Merge and Quellbrook Studio are invented names. Test content — RockitMedia R&amp;D</footer>
+</div>
+</body>
+</html>
