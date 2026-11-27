@@ -2,14 +2,19 @@
 
 Test landings for the insider ads that OrbitTap Portal shows. They are standalone pages: no
 testbed shell and no entry in `assets/js/nav-data.js`. Each page is self-contained (inline CSS,
-JavaScript and SVG; one local image, `img/coast.svg`), has no trackers and no external fonts, and
-sends nothing anywhere. Every name on them is invented, and every footer says
+JavaScript and SVG; one local background image, `img/coast.svg`), has no trackers and no external
+fonts, and sends nothing anywhere. Every name on them is invented, and every footer says
 "Test content — RockitMedia R&D".
 
 `/getData` at the site root (a file with no extension) is the config answer: its `offer` key
 carries the three landing links below, in this order.
 
 ## Landings
+
+Each landing names a square preview picture with `<meta property="og:image">`:
+`img/lp-game.png`, `img/lp-sweeps.png` and `img/lp-quiz.png` (512 × 512 PNG). Portal shows it
+in the story circle of that landing. The link is absolute, because a preview picture is read
+without the page around it.
 
 A landing has one call to action (CTA): the first link or form the user activates. Each landing
 has more than one button, as real landings do; all of them lead to the same final page.
